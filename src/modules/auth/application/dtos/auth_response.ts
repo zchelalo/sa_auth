@@ -1,5 +1,5 @@
+import { AuthValue } from 'src/modules/auth/domain/value'
 import { DTOUserResponse } from 'src/modules/user/application/dtos/user_response'
-import { AuthValue } from '../../domain/value'
 
 /**
  * Data Transfer Object for Auth Response.

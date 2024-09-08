@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { AuthUseCase } from '../application/use_cases/auth'
+import { AuthUseCase } from 'src/modules/auth/application/use_cases/auth'
 
 import { cookieNames } from 'src/config/constants'
 import { durationToMilliseconds } from 'src/utils/time_converter'

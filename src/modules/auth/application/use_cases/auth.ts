@@ -1,11 +1,11 @@
-import { AuthRepository } from '../../domain/repository'
+import { AuthRepository } from 'src/modules/auth/domain/repository'
 import { UserRepository } from 'src/modules/user/domain/repository'
 import { UserValue } from 'src/modules/user/domain/value'
-import { TokenValue } from '../../domain/value'
+import { TokenValue } from 'src/modules/auth/domain/value'
 
-import { DTOAuthResponse } from '../dtos/auth_response'
+import { DTOAuthResponse } from 'src/modules/auth/application/dtos/auth_response'
 import { DTOUserCreate } from 'src/modules/user/application/dtos/user_create'
-import { signInSchema, signOutSchema, tokenSchema } from '../schemas/auth'
+import { signInSchema, tokenSchema } from 'src/modules/auth/application/schemas/auth'
 import { createUserSchema } from 'src/modules/user/application/schemas/user'
 
 import { createJWT, tokenExpiration, TokenType, verifyJWT } from 'src/utils/jwt'

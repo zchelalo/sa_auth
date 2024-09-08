@@ -1,4 +1,4 @@
-import { UserEntity } from '../../user/domain/entity'
+import { UserEntity } from 'src/modules/user/domain/entity'
 
 /**
  * Represents a Auth entity.

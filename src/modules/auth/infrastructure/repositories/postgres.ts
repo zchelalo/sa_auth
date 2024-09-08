@@ -1,9 +1,9 @@
-import { AuthRepository } from '../../domain/repository'
-import { TokenTypeValue, TokenValue } from '../../domain/value'
+import { AuthRepository } from 'src/modules/auth/domain/repository'
+import { TokenTypeValue, TokenValue } from 'src/modules/auth/domain/value'
 
 import { db } from 'src/data/drizzle/config/orm'
 import { token, tokenType } from 'src/data/drizzle/schemas'
-import { eq, and } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 
 import { NotFoundError } from 'src/helpers/errors/custom_error'
 
