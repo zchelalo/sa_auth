@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { Pagination } from '../utils/pagination'
+import { Pagination } from 'src/utils/pagination'
 
 /**
  * This middleware extracts the page and limit query parameters from the request and sets them in the request object. The page parameter is used to determine the page number, and the limit parameter is used to determine the number of items per page. This middleware must be used before any other middleware that requires pagination.

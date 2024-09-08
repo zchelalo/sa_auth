@@ -1,4 +1,5 @@
 import { TokenTypeValue, TokenValue } from 'src/modules/auth/domain/value'
+import { TokenType } from 'src/config/constants'
 
 /**
  * AuthRepository interface.
@@ -35,8 +36,8 @@ export interface AuthRepository {
   /**
    * Retrieves a token type ID by the key.
    * 
-   * @param {string} key - The key of the token type.
+   * @param {TokenType} key - The key of the token type.
    * @returns {Promise<TokenTypeValue>} A promise that resolves to a TokenTypeValue object.
   */
-  getTokenTypeIdByKey(key: string): Promise<TokenTypeValue>
+  getTokenTypeIdByKey(key: TokenType): Promise<TokenTypeValue>
 }

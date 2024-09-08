@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express'
 import { AuthUseCase } from 'src/modules/auth/application/use_cases/auth'
 
-import { cookieNames } from 'src/config/constants'
+import { CookieNames, TokenType } from 'src/config/constants'
 import { durationToMilliseconds } from 'src/utils/time_converter'
-import { tokenExpiration, TokenType } from 'src/utils/jwt'
+import { tokenExpiration } from 'src/utils/jwt'
 
 import { UnauthorizedError } from 'src/helpers/errors/custom_error'
 
@@ -51,7 +51,7 @@ export class AuthController {
   */
   public signIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const refreshToken = req.cookies[cookieNames.REFRESH_TOKEN]
+      const refreshToken = req.cookies[CookieNames.REFRESH_TOKEN]
       if (refreshToken) {
         const refreshTokenExist = await this.useCase.tokenExist(refreshToken, TokenType.REFRESH)
         if (refreshTokenExist) {
@@ -63,14 +63,14 @@ export class AuthController {
       const authData = await this.useCase.signIn(user.email, user.password)
 
       // Both cookies are with the same expiration time because if the access token expires, the refresh token will be used to generate a new one. 
-      res.cookie(cookieNames.ACCESS_TOKEN, authData.accessToken, {
+      res.cookie(CookieNames.ACCESS_TOKEN, authData.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'none',
         maxAge: durationToMilliseconds(tokenExpiration[TokenType.REFRESH])
       })
 
-      res.cookie(cookieNames.REFRESH_TOKEN, authData.refreshToken, {
+      res.cookie(CookieNames.REFRESH_TOKEN, authData.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'none',
@@ -98,7 +98,7 @@ export class AuthController {
   */
   public signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const refreshToken = req.cookies[cookieNames.REFRESH_TOKEN]
+      const refreshToken = req.cookies[CookieNames.REFRESH_TOKEN]
       if (refreshToken) {
         const refreshTokenExist = await this.useCase.tokenExist(refreshToken, TokenType.REFRESH)
         if (refreshTokenExist) {
@@ -110,14 +110,14 @@ export class AuthController {
       const authData = await this.useCase.signUp(user)
 
       // Both cookies are with the same expiration time because if the access token expires, the refresh token will be used to generate a new one. 
-      res.cookie(cookieNames.ACCESS_TOKEN, authData.accessToken, {
+      res.cookie(CookieNames.ACCESS_TOKEN, authData.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'none',
         maxAge: durationToMilliseconds(tokenExpiration[TokenType.REFRESH])
       })
 
-      res.cookie(cookieNames.REFRESH_TOKEN, authData.refreshToken, {
+      res.cookie(CookieNames.REFRESH_TOKEN, authData.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'none',
@@ -151,10 +151,10 @@ export class AuthController {
       if (!userId) {
         throw new UnauthorizedError()
       }
-      await this.useCase.signOut(req.cookies[cookieNames.REFRESH_TOKEN])
+      await this.useCase.signOut(req.cookies[CookieNames.REFRESH_TOKEN])
 
-      res.clearCookie(cookieNames.ACCESS_TOKEN)
-      res.clearCookie(cookieNames.REFRESH_TOKEN)
+      res.clearCookie(CookieNames.ACCESS_TOKEN)
+      res.clearCookie(CookieNames.REFRESH_TOKEN)
 
       res.sendSuccess({ status: 200, message: 'success', data: null, meta: null })
     } catch (error) {

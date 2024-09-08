@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 
-import { cookieNames } from 'src/config/constants'
-import { tokenExpiration, TokenType, verifyJWT } from 'src/utils/jwt'
+import { CookieNames, TokenType } from 'src/config/constants'
+import { tokenExpiration, verifyJWT } from 'src/utils/jwt'
 import { durationToMilliseconds } from 'src/utils/time_converter'
 
 import { PostgresRepository as AuthPostgresRepository } from 'src/modules/auth/infrastructure/repositories/postgres'
@@ -27,7 +27,7 @@ const useCase = new AuthUseCase(authRepository, userRepository)
    * ```
   */
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const token = req.cookies[cookieNames.ACCESS_TOKEN]
+  const token = req.cookies[CookieNames.ACCESS_TOKEN]
 
   try {
     const payload = await verifyJWT(token, TokenType.ACCESS)
@@ -35,7 +35,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     next()
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
-      const refreshToken = req.cookies[cookieNames.REFRESH_TOKEN]
+      const refreshToken = req.cookies[CookieNames.REFRESH_TOKEN]
       if (!refreshToken) {
         res.sendError({ status: 401, message: 'unauthorized', details: { message: 'refresh token is missing' } })
         return 
@@ -43,7 +43,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
 
       try {
         const newTokens = await useCase.refreshAccessToken(refreshToken)
-        res.cookie(cookieNames.ACCESS_TOKEN, newTokens.accessToken, {
+        res.cookie(CookieNames.ACCESS_TOKEN, newTokens.accessToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'none',
@@ -51,7 +51,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         })
 
         if (newTokens.refreshToken) {
-          res.cookie(cookieNames.REFRESH_TOKEN, newTokens.refreshToken, {
+          res.cookie(CookieNames.REFRESH_TOKEN, newTokens.refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'none',

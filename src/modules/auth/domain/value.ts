@@ -2,6 +2,7 @@ import { UserEntity } from 'src/modules/user/domain/entity'
 import { AuthEntity } from 'src/modules/auth/domain/entity'
 
 import { v4 } from 'uuid'
+import { TokenType } from 'src/config/constants'
 
 /**
  * AuthValue class.
@@ -123,9 +124,9 @@ export class TokenTypeValue {
 
   /**
    * Creates a new TokenTypeValue instance.
-   * @param {string} key - The key of the token type.
+   * @param {TokenType} key - The key of the token type.
   */
-  constructor(key: string) {
+  constructor(key: TokenType) {
     this.id = v4()
     this.key = key
   }

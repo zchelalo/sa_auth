@@ -2,32 +2,7 @@ import jwt from 'jsonwebtoken'
 import fs from 'fs/promises'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
-
-/**
- * Token types for JWT
- * @enum
- */
-export enum TokenType {
-  /**
-   * Access token
-   */
-  ACCESS = 'access',
-
-  /**
-   * Refresh token
-   */
-  REFRESH = 'refresh',
-
-  /**
-   * Verify token. Used for email verification
-   */
-  VERIFY = 'verify',
-
-  /**
-   * Recover token. Used for password recovery
-   */
-  RECOVER = 'recover'
-}
+import { TokenType } from 'src/config/constants'
 
 /**
  * Certificate types for JWT
