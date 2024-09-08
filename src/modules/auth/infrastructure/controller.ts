@@ -53,7 +53,7 @@ export class AuthController {
     try {
       const refreshToken = req.cookies[cookieNames.REFRESH_TOKEN]
       if (refreshToken) {
-        const refreshTokenExist = await this.useCase.refreshTokenExist(refreshToken)
+        const refreshTokenExist = await this.useCase.tokenExist(refreshToken, TokenType.REFRESH)
         if (refreshTokenExist) {
           throw new UnauthorizedError()
         }

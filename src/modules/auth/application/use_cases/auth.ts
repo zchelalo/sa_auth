@@ -137,7 +137,6 @@ export class AuthUseCase {
   /**
    * @function signOut
    * @description Sign out a user.
-   * @param userId - The id of the user.
    * @param refreshToken - The refresh token of the user.
    * @returns {Promise<void>} A promise that resolves to the void.
    * @throws {UnauthorizedError} If the refresh token is invalid.
@@ -201,8 +200,20 @@ export class AuthUseCase {
     }
   }
 
-  public async refreshTokenExist(token: string): Promise<boolean> {
-    const payload = await verifyJWT(token, TokenType.REFRESH)
+  /**
+   * @function tokenExist
+   * @description Check if a token exists.
+   * @param token - The token to check.
+   * @param type - The type of the token.
+   * @returns {Promise<boolean>} A promise that resolves to a boolean indicating if the token exists.
+   * @example
+   * ```ts
+   * const token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3ZDgwNzQwNi1hNTQzLTRlMWYtYjAxOS1jOGIwNWQ1OGM1OWIiLCJpYXQiOjE3MjQ2MzExMjksImV4cCI6MTcyNTkyNzEyOX0.l7WXdoTopPRqeK-TNIgJtCoR863Yot5cJC-jV3v6DwJtrvH9wjqGFPHpgo00z4d9jCbMTEBnUfv2NkFCk4ecPt4YTledruAuxQoULk3NqoaXhn4wlKhQj7w14ngldir_pud4SxXJnfaw_zd1xg6Gd7rDH-LAWUYaNyvs8qt2CRra7pnBA6tBUvrO58HYReJRQU-GQP9PWRmRC4G8H3tpnGEybn4NcNCn-rO-PIgABZ1I3Len1y8ibKMrz53Rc1PTUTInD96RORM5zp5c06qkyUjW9AThFQwmYP9Yzo4z3fBsuvqQFha31lWoqzP5LNk2iOHECuequuLPThtNWdsRyw'
+   * const tokenExist = await authUseCase.refreshTokenExist(refreshToken, TokenType.REFRESH)
+   * ```
+   */
+  public async tokenExist(token: string, type: TokenType): Promise<boolean> {
+    const payload = await verifyJWT(token, type)
     if (!payload) {
       return false
     }
