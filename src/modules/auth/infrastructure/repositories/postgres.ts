@@ -33,7 +33,7 @@ export class PostgresRepository implements AuthRepository {
    * const token = await repository.getTokenByUserIdAndValue(userId, tokenValue)
    * ```
   */
-  async getTokenByUserIdAndValue(id: string, tokenValue: string): Promise<TokenValue> {
+  async getTokenByTokenValue(tokenValue: string): Promise<TokenValue> {
     const tokenObtained = await db
       .select({
         id: token.id,
@@ -42,10 +42,7 @@ export class PostgresRepository implements AuthRepository {
         tokenTypeId: token.tokenTypeId
       })
       .from(token)
-      .where(and(
-        eq(token.userId, id),
-        eq(token.token, tokenValue)
-      ))
+      .where(eq(token.token, tokenValue))
       .limit(1)
 
     if (!tokenObtained.length) {
@@ -88,14 +85,12 @@ export class PostgresRepository implements AuthRepository {
    * await repository.revokeTokenByUserIdAndValue(userId, tokenValue)
    * ```
   */
-  async revokeTokenByUserIdAndValue(id: string, tokenValue: string): Promise<void> {
-    await this.getTokenByUserIdAndValue(id, tokenValue)
+  async revokeTokenByTokenValue(tokenValue: string): Promise<void> {
+    await this.getTokenByTokenValue(tokenValue)
 
     await db
       .delete(token)
-      .where(and(
-        eq(token.userId, id), eq(token.token, tokenValue)
-      ))
+      .where(eq(token.token, tokenValue))
   }
 
   /**

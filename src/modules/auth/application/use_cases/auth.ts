@@ -148,15 +148,15 @@ export class AuthUseCase {
    * await authUseCase.signOut(userId, refreshToken)
    * ```
   */
-  public async signOut(userId: string, refreshToken: string): Promise<void> {
-    signOutSchema.parse({ userId, refreshToken })
+  public async signOut(refreshToken: string): Promise<void> {
+    tokenSchema.parse({ refreshToken })
 
     const payload = await verifyJWT(refreshToken, TokenType.REFRESH)
     if (!payload) {
       throw new UnauthorizedError()
     }
 
-    await this.authRepository.revokeTokenByUserIdAndValue(payload.sub as string, refreshToken)
+    await this.authRepository.revokeTokenByTokenValue(refreshToken)
   }
 
   /**
@@ -179,13 +179,13 @@ export class AuthUseCase {
       throw new UnauthorizedError()
     }
 
-    await this.authRepository.getTokenByUserIdAndValue(payload.sub as string, rToken)
+    await this.authRepository.getTokenByTokenValue(rToken)
 
     const accessToken = await createJWT({ sub: payload.sub }, TokenType.ACCESS)
 
     let refreshToken = undefined
     if (this.shouldRefreshTheRefreshToken(payload)) {
-      await this.authRepository.revokeTokenByUserIdAndValue(payload.sub as string, rToken)
+      await this.authRepository.revokeTokenByTokenValue(rToken)
 
       refreshToken = await createJWT({ sub: payload.sub }, TokenType.REFRESH)
 
@@ -199,6 +199,17 @@ export class AuthUseCase {
       refreshToken,
       userId: payload.sub as string
     }
+  }
+
+  public async refreshTokenExist(token: string): Promise<boolean> {
+    const payload = await verifyJWT(token, TokenType.REFRESH)
+    if (!payload) {
+      return false
+    }
+
+    const tokenObtained = await this.authRepository.getTokenByTokenValue(token)
+
+    return tokenObtained ? true : false
   }
 
   private shouldRefreshTheRefreshToken(payload: jwt.JwtPayload): boolean {

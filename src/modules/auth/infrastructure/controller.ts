@@ -51,6 +51,14 @@ export class AuthController {
   */
   public signIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      const refreshToken = req.cookies[cookieNames.REFRESH_TOKEN]
+      if (refreshToken) {
+        const refreshTokenExist = await this.useCase.refreshTokenExist(refreshToken)
+        if (refreshTokenExist) {
+          throw new UnauthorizedError()
+        }
+      }
+
       const user = req.body
       const authData = await this.useCase.signIn(user.email, user.password)
 
@@ -137,7 +145,7 @@ export class AuthController {
       if (!userId) {
         throw new UnauthorizedError()
       }
-      await this.useCase.signOut(userId, req.cookies[cookieNames.REFRESH_TOKEN])
+      await this.useCase.signOut(req.cookies[cookieNames.REFRESH_TOKEN])
 
       res.clearCookie(cookieNames.ACCESS_TOKEN)
       res.clearCookie(cookieNames.REFRESH_TOKEN)

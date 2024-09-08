@@ -11,11 +11,10 @@ export interface AuthRepository {
   /**
    * Retrieves a token by the user ID and the token.
    * 
-   * @param {string} id - The ID of the user.
    * @param {string} tokenValue - The token of the user.
    * @returns {Promise<TokenValue>} A promise that resolves to a TokenValue object.
   */
-  getTokenByUserIdAndValue(id: string, tokenValue: string): Promise<TokenValue>
+  getTokenByTokenValue(tokenValue: string): Promise<TokenValue>
 
   /**
    * Saves a new token.
@@ -28,11 +27,10 @@ export interface AuthRepository {
   /**
    * Revokes a token by the User ID and the token value.
    * 
-   * @param {string} id - The ID of the user.
    * @param {string} tokenValue - The token of the user.
    * @returns {Promise<void>} A promise that resolves to void.
   */
-  revokeTokenByUserIdAndValue(id: string, tokenValue: string): Promise<void>
+  revokeTokenByTokenValue(tokenValue: string): Promise<void>
 
   /**
    * Retrieves a token type ID by the key.
