@@ -100,6 +100,14 @@ export class AuthController {
   */
   public signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      const refreshToken = req.cookies[cookieNames.REFRESH_TOKEN]
+      if (refreshToken) {
+        const refreshTokenExist = await this.useCase.tokenExist(refreshToken, TokenType.REFRESH)
+        if (refreshTokenExist) {
+          throw new UnauthorizedError()
+        }
+      }
+
       const user = req.body
       const authData = await this.useCase.signUp(user)
 
