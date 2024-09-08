@@ -1,6 +1,6 @@
-import '../../../config'
-import { db } from './orm'
-import * as schema from '../schemas'
+import 'src/config'
+import { db } from 'src/data/drizzle/config/orm'
+import * as schema from 'src/data/drizzle/schemas'
 import { logger } from 'src/helpers/logger'
 import { v4 } from 'uuid'
 
