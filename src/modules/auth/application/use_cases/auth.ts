@@ -223,6 +223,21 @@ export class AuthUseCase {
     return tokenObtained ? true : false
   }
 
+  /**
+   * @function shouldRefreshTheRefreshToken
+   * @description Check if the refresh token should be refreshed.
+   * @param payload - The payload of the token.
+   * @returns {boolean} A boolean indicating if the refresh token should be refreshed.
+   * @throws {InternalServerError} If the expiration time is missing.
+   * @example
+   * ```ts
+   * const payload = {
+   *  sub: '938d6f5b-b4a6-4669-a514-ddb3a23621fc',
+   *  iat: 1624631129,
+   *  exp: 1625927129
+   * }
+   * const shouldRefresh = authUseCase.shouldRefreshTheRefreshToken(payload)
+   */
   private shouldRefreshTheRefreshToken(payload: jwt.JwtPayload): boolean {
     const currentTime = Math.floor(Date.now() / 1000)
 

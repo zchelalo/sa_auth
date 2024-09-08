@@ -77,9 +77,7 @@ export class AuthController {
         maxAge: durationToMilliseconds(tokenExpiration[TokenType.REFRESH])
       })
 
-      res.sendSuccess({ status: 200, message: 'success', data: {
-        user: authData.user
-      }, meta: null })
+      res.sendSuccess({ status: 200, message: 'success', data: authData.user, meta: null })
     } catch (error) {
       next(error)
     }
