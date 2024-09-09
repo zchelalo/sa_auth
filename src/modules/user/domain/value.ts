@@ -34,6 +34,12 @@ export class UserValue implements UserEntity {
   readonly password: string
 
   /**
+   * A boolean value indicating whether the user is verified.
+   * @type {boolean}
+  */
+  readonly verified: boolean
+
+  /**
    * Creates a new UserValue instance.
    * 
    * @param {string} name - The name of the user.
@@ -45,5 +51,6 @@ export class UserValue implements UserEntity {
     this.name = name
     this.email = email
     this.password = password
+    this.verified = false
   }
 }

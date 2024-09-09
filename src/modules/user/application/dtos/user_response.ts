@@ -22,13 +22,19 @@ export class DTOUserResponse {
   email: string
 
   /**
+   * A boolean value indicating whether the user is verified.
+  */
+  verified: boolean
+
+  /**
    * Creates an instance of DTOUserResponse.
    * 
    * @param {UserValue} user - The user value object from the domain layer.
   */
-  constructor({ id, name, email }: UserValue) {
+  constructor({ id, name, email, verified }: UserValue) {
     this.id = id
     this.name = name
     this.email = email
+    this.verified = verified
   }
 }

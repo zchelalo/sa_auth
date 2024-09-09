@@ -26,7 +26,8 @@ export class PostgresRepository implements UserRepository {
         id: user.id,
         name: user.name,
         email: user.email,
-        password: user.password
+        password: user.password,
+        verified: user.verified
       })
       .from(user)
       .where(eq(user.id, id))
@@ -51,7 +52,8 @@ export class PostgresRepository implements UserRepository {
         id: user.id,
         name: user.name,
         email: user.email,
-        password: user.password
+        password: user.password,
+        verified: user.verified
       })
       .from(user)
       .where(eq(user.email, email))
@@ -77,7 +79,8 @@ export class PostgresRepository implements UserRepository {
         id: user.id,
         name: user.name,
         email: user.email,
-        password: user.password
+        password: user.password,
+        verified: user.verified
       })
       .from(user)
       .offset(offset)
@@ -134,7 +137,8 @@ export class PostgresRepository implements UserRepository {
         id: user.id,
         name: user.name,
         email: user.email,
-        password: user.password
+        password: user.password,
+        verified: user.verified
       })
 
     return userCreated[0]

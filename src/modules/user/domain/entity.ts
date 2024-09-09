@@ -30,4 +30,10 @@ export interface UserEntity {
    * @type {string}
   */
   password: string
+
+  /**
+   * A boolean value indicating whether the user is verified.
+   * @type {boolean}
+  */
+  verified: boolean
 }

@@ -13,6 +13,10 @@ export const signInSchema = z.object({
   password: z.string().min(8)
 })
 
+export const signUpSchema = signInSchema.extend({
+  name: z.string().min(3)
+})
+
 /**
  * Token schema
  * 
@@ -22,4 +26,8 @@ export const signInSchema = z.object({
  */
 export const tokenSchema = z.object({
   token: z.string()
+})
+
+export const refreshTokenSchema = z.object({
+  refreshToken: z.string()
 })

@@ -1,164 +1,127 @@
-import { Request, Response, NextFunction } from 'express'
 import { AuthUseCase } from 'src/modules/auth/application/use_cases/auth'
 
-import { CookieNames, TokenType } from 'src/config/constants'
-import { durationToMilliseconds } from 'src/utils/time_converter'
-import { tokenExpiration } from 'src/utils/jwt'
+import * as grpc from '@grpc/grpc-js'
+import { Auth, SignInRequest, SignInResponse, SignOutRequest, SignOutResponse, SignUpRequest, SignUpResponse } from 'src/proto/auth/service'
+import { CustomError } from 'src/helpers/errors/custom_error'
+import { convertCustomErrorToGrpcError } from 'src/helpers/errors/convert_error'
 
-import { UnauthorizedError } from 'src/helpers/errors/custom_error'
-
-/**
- * AuthController class.
- * 
- * This class handles HTTP requests related to auth operations, such as signing in, signing up and signing out.
- * 
- * @example
- * ```ts
- * const authRepository = new AuthPostgresRepository()
- * const userRepository = new UserPostgresRepository()
- * const authUseCase = new AuthUseCase(authRepository, userRepository)
- * const controller = new AuthController(authUseCase)
- * ```
-*/
 export class AuthController {
-  /**
-   * An instance of the AuthUseCase class, which contains the business logic.
-   * @private
-  */
   private readonly useCase: AuthUseCase
 
-  /**
-   * Creates an instance of AuthController.
-   * 
-   * @param {AuthUseCase} useCase - The use case instance for handling auth-related operations.
-  */
   constructor(useCase: AuthUseCase) {
     this.useCase = useCase
   }
 
-  /**
-   * Handles the request to sign in a user.
-   * 
-   * @param {Request} req - The Express request object, containing the sign in data.
-   * @param {Response} res - The Express response object, used to send the user data.
-   * @param {NextFunction} next - The Express next function, used to pass errors to the error handler.
-   * @returns {Promise<void>} A promise that resolves to void.
-   * @example
-   * ```ts
-   * const router = Router()
-   * router.post('/sign-in', controller.signIn)
-   * ```
-  */
-  public signIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public signIn = async (call: grpc.ServerUnaryCall<SignInRequest, any>, callback: grpc.sendUnaryData<SignInResponse>): Promise<void> => {
     try {
-      const refreshToken = req.cookies[CookieNames.REFRESH_TOKEN]
-      if (refreshToken) {
-        const refreshTokenExist = await this.useCase.tokenExist(refreshToken, TokenType.REFRESH)
-        if (refreshTokenExist) {
-          throw new UnauthorizedError()
+      const { email, password } = call.request
+      const result = await this.useCase.signIn(email, password)
+  
+      const auth: Auth = {
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        user: {
+          id: result.user.id,
+          name: result.user.name,
+          email: result.user.email,
+          verified: result.user.verified
         }
       }
-
-      const user = req.body
-      const authData = await this.useCase.signIn(user.email, user.password)
-
-      // Both cookies are with the same expiration time because if the access token expires, the refresh token will be used to generate a new one. 
-      res.cookie(CookieNames.ACCESS_TOKEN, authData.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none',
-        maxAge: durationToMilliseconds(tokenExpiration[TokenType.REFRESH])
-      })
-
-      res.cookie(CookieNames.REFRESH_TOKEN, authData.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none',
-        maxAge: durationToMilliseconds(tokenExpiration[TokenType.REFRESH])
-      })
-
-      res.sendSuccess({ status: 200, message: 'success', data: authData.user, meta: null })
-    } catch (error) {
-      next(error)
+  
+      const signInResponse: SignInResponse = {
+        response: {
+          auth: auth,
+          error: undefined
+        }
+      }
+  
+      callback(null, signInResponse)
+    } catch (err) {
+      if (err instanceof CustomError) {
+        const grpcError = convertCustomErrorToGrpcError(err)
+        callback(grpcError, null)
+      } else {
+        const grpcError: grpc.ServiceError = {
+          name: 'UnknownError',
+          message: 'An unexpected error occurred',
+          code: grpc.status.INTERNAL,
+          details: 'An unexpected error occurred',
+          metadata: new grpc.Metadata()
+        }
+        callback(grpcError, null)
+      }
     }
   }
 
-  /**
-   * Handles the request to sign up a user.
-   * 
-   * @param {Request} req - The Express request object, containing the sign up data.
-   * @param {Response} res - The Express response object, used to send the user data.
-   * @param {NextFunction} next - The Express next function, used to pass errors to the error handler.
-   * @returns {Promise<void>} A promise that resolves to void.
-   * @example
-   * ```ts
-   * const router = Router()
-   * router.post('/sign-up', controller.signUp)
-   * ```
-  */
-  public signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public signUp = async (call: grpc.ServerUnaryCall<SignUpRequest, any>, callback: grpc.sendUnaryData<SignUpResponse>): Promise<void> => {
     try {
-      const refreshToken = req.cookies[CookieNames.REFRESH_TOKEN]
-      if (refreshToken) {
-        const refreshTokenExist = await this.useCase.tokenExist(refreshToken, TokenType.REFRESH)
-        if (refreshTokenExist) {
-          throw new UnauthorizedError()
+      const { name, email, password } = call.request
+      const result = await this.useCase.signUp({
+        name,
+        email,
+        password
+      })
+
+      const auth: Auth = {
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        user: {
+          id: result.user.id,
+          name: result.user.name,
+          email: result.user.email,
+          verified: result.user.verified
+        }
+      }
+  
+      const signUpResponse: SignUpResponse = {
+        response: {
+          auth: auth,
+          error: undefined
         }
       }
 
-      const user = req.body
-      const authData = await this.useCase.signUp(user)
-
-      // Both cookies are with the same expiration time because if the access token expires, the refresh token will be used to generate a new one. 
-      res.cookie(CookieNames.ACCESS_TOKEN, authData.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none',
-        maxAge: durationToMilliseconds(tokenExpiration[TokenType.REFRESH])
-      })
-
-      res.cookie(CookieNames.REFRESH_TOKEN, authData.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none',
-        maxAge: durationToMilliseconds(tokenExpiration[TokenType.REFRESH])
-      })
-
-      res.sendSuccess({ status: 201, message: 'success', data: {
-        user: authData.user
-      }, meta: null })
-    } catch (error) {
-      next(error)
+      callback(null, signUpResponse)
+    } catch (err) {
+      if (err instanceof CustomError) {
+        const grpcError = convertCustomErrorToGrpcError(err)
+        callback(grpcError, null)
+      } else {
+        const grpcError: grpc.ServiceError = {
+          name: 'UnknownError',
+          message: 'An unexpected error occurred',
+          code: grpc.status.INTERNAL,
+          details: 'An unexpected error occurred',
+          metadata: new grpc.Metadata()
+        }
+        callback(grpcError, null)
+      }
     }
   }
 
-  /**
-   * Handles the request to sign out a user.
-   * 
-   * @param {Request} req - The Express request object, containing the sign out data in the cookies.
-   * @param {Response} res - The Express response object, used to send the response of the sign out operation.
-   * @param {NextFunction} next - The Express next function, used to pass errors to the error handler.
-   * @returns {Promise<void>} A promise that resolves to void.
-   * @example
-   * ```ts
-   * const router = Router()
-   * router.post('/sign-out', controller.signOut)
-   * ```
-  */
-  public signOut = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public signOut = async (call: grpc.ServerUnaryCall<SignOutRequest, any>, callback: grpc.sendUnaryData<SignOutResponse>): Promise<void> => {
     try {
-      const userId = req.user
-      if (!userId) {
-        throw new UnauthorizedError()
+      const { refreshToken } = call.request
+      await this.useCase.signOut(refreshToken)
+
+      const signOutResponse: SignOutResponse = {
+        success: true
       }
-      await this.useCase.signOut(req.cookies[CookieNames.REFRESH_TOKEN])
 
-      res.clearCookie(CookieNames.ACCESS_TOKEN)
-      res.clearCookie(CookieNames.REFRESH_TOKEN)
-
-      res.sendSuccess({ status: 200, message: 'success', data: null, meta: null })
-    } catch (error) {
-      next(error)
+      callback(null, signOutResponse)
+    } catch (err) {
+      if (err instanceof CustomError) {
+        const grpcError = convertCustomErrorToGrpcError(err)
+        callback(grpcError, null)
+      } else {
+        const grpcError: grpc.ServiceError = {
+          name: 'UnknownError',
+          message: 'An unexpected error occurred',
+          code: grpc.status.INTERNAL,
+          details: 'An unexpected error occurred',
+          metadata: new grpc.Metadata()
+        }
+        callback(grpcError, null)
+      }
     }
   }
 }

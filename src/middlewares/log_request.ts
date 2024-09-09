@@ -1,25 +1,20 @@
-// src/middlewares/someMiddleware.ts
-import { Request, Response, NextFunction } from 'express'
+import * as grpc from '@grpc/grpc-js'
 import { logger } from 'src/helpers/logger'
+import { Middleware } from './base'
 
 /**
- * Logs the incoming request and the response status code. This middleware must be used before any other middleware that sends a response.
- * 
- * @param {Request} req - The Express request object, containing the request method and the request URL.
- * @param {Response} res - The Express response object, used to log the response status code.
- * @param {NextFunction} next - The Express next function, used to pass the control to the next middleware.
- * @returns {void} A promise that resolves to void.
- * @example
- * ```ts
- * const router = Router()
- * router.use(logRequestMiddleware)
- * router.get('/users', controller.getUsers)
- * ```
-*/
-export const logRequestMiddleware = (req: Request, res: Response, next: NextFunction): void => {
-  logger.info(`Incoming request: ${req.method} ${req.url}`)
-  res.on('finish', () => {
-    logger.info(`Response: ${res.statusCode}`)
-  })
-  next()
+ * Middleware para loguear las solicitudes y respuestas gRPC.
+ *
+ * @returns Middleware para envolver el manejador.
+ */
+export const logRequestMiddleware = <TRequest = any, TResponse = any>(): Middleware<TRequest, TResponse> => {
+  return (
+    call: grpc.ServerUnaryCall<TRequest, TResponse>,
+    _: grpc.sendUnaryData<TResponse>,
+    next: (error?: grpc.ServiceError) => void
+  ): void => {
+    logger.info(`Incoming request - Method: ${call.getPath()}`)
+
+    next()
+  }
 }
