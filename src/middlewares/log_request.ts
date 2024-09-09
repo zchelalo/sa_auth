@@ -2,11 +2,6 @@ import * as grpc from '@grpc/grpc-js'
 import { logger } from 'src/helpers/logger'
 import { Middleware } from './base'
 
-/**
- * Middleware para loguear las solicitudes y respuestas gRPC.
- *
- * @returns Middleware para envolver el manejador.
- */
 export const logRequestMiddleware = <TRequest = any, TResponse = any>(): Middleware<TRequest, TResponse> => {
   return (
     call: grpc.ServerUnaryCall<TRequest, TResponse>,
