@@ -116,7 +116,9 @@ export class AuthUseCase {
   public async signUp(user: DTOUserCreate): Promise<DTOAuthResponse> {
     createUserSchema.parse(user)
 
-    const newUser = new UserValue(user.name, user.email, user.password)
+    const hashedPassword = await bcrypt.hash(user.password, 10)
+
+    const newUser = new UserValue(user.name, user.email, hashedPassword)
     const userCreated = await this.userRepository.createUser(newUser)
 
     const accessToken = await createJWT({ sub: userCreated.id }, TokenType.ACCESS)
@@ -148,7 +150,7 @@ export class AuthUseCase {
    * ```
   */
   public async signOut(refreshToken: string): Promise<void> {
-    tokenSchema.parse({ refreshToken })
+    tokenSchema.parse({ token: refreshToken })
 
     const payload = await verifyJWT(refreshToken, TokenType.REFRESH)
     if (!payload) {

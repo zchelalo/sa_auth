@@ -5,7 +5,8 @@
   "main": "./src/main.ts",
   "type": "module",
   "scripts": {
-    "proto:generate": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/proto --ts_proto_opt=outputServices=grpc-js,env=node --proto_path=sa_proto sa_proto/auth/service.proto",
+    "proto:generate:auth": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/proto --ts_proto_opt=outputServices=grpc-js,env=node --proto_path=sa_proto sa_proto/auth/service.proto",
+    "proto:generate:user": "protoc --experimental_allow_proto3_optional --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/proto --ts_proto_opt=outputServices=grpc-js,env=node --proto_path=sa_proto sa_proto/user/service.proto",
     "create:envs": "bash ./scripts/create_envs.sh",
     "create:certs": "bash ./scripts/create_certs.sh",
     "create:docs": "typedoc --entryPointStrategy expand ./src --name 'App' --out docs",

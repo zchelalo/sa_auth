@@ -27,7 +27,3 @@ export const signUpSchema = signInSchema.extend({
 export const tokenSchema = z.object({
   token: z.string()
 })
-
-export const refreshTokenSchema = z.object({
-  refreshToken: z.string()
-})
