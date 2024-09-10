@@ -28,10 +28,6 @@ export interface User {
   verified: boolean;
 }
 
-export interface UserList {
-  users: User[];
-}
-
 export interface Meta {
   page: number;
   perPage: number;
@@ -40,7 +36,7 @@ export interface Meta {
 }
 
 export interface UsersWithMeta {
-  users: UserList | undefined;
+  users: User[];
   meta: Meta | undefined;
 }
 
@@ -85,6 +81,7 @@ export interface UpdateUserRequest {
   id: string;
   name?: string | undefined;
   email?: string | undefined;
+  password?: string | undefined;
   verified?: boolean | undefined;
 }
 
@@ -206,63 +203,6 @@ export const User: MessageFns<User> = {
   },
 };
 
-function createBaseUserList(): UserList {
-  return { users: [] };
-}
-
-export const UserList: MessageFns<UserList> = {
-  encode(message: UserList, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    for (const v of message.users) {
-      User.encode(v!, writer.uint32(10).fork()).join();
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): UserList {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseUserList();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.users.push(User.decode(reader, reader.uint32()));
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): UserList {
-    return { users: globalThis.Array.isArray(object?.users) ? object.users.map((e: any) => User.fromJSON(e)) : [] };
-  },
-
-  toJSON(message: UserList): unknown {
-    const obj: any = {};
-    if (message.users?.length) {
-      obj.users = message.users.map((e) => User.toJSON(e));
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<UserList>, I>>(base?: I): UserList {
-    return UserList.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<UserList>, I>>(object: I): UserList {
-    const message = createBaseUserList();
-    message.users = object.users?.map((e) => User.fromPartial(e)) || [];
-    return message;
-  },
-};
-
 function createBaseMeta(): Meta {
   return { page: 0, perPage: 0, count: 0, totalCount: 0 };
 }
@@ -368,13 +308,13 @@ export const Meta: MessageFns<Meta> = {
 };
 
 function createBaseUsersWithMeta(): UsersWithMeta {
-  return { users: undefined, meta: undefined };
+  return { users: [], meta: undefined };
 }
 
 export const UsersWithMeta: MessageFns<UsersWithMeta> = {
   encode(message: UsersWithMeta, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.users !== undefined) {
-      UserList.encode(message.users, writer.uint32(10).fork()).join();
+    for (const v of message.users) {
+      User.encode(v!, writer.uint32(10).fork()).join();
     }
     if (message.meta !== undefined) {
       Meta.encode(message.meta, writer.uint32(18).fork()).join();
@@ -394,7 +334,7 @@ export const UsersWithMeta: MessageFns<UsersWithMeta> = {
             break;
           }
 
-          message.users = UserList.decode(reader, reader.uint32());
+          message.users.push(User.decode(reader, reader.uint32()));
           continue;
         case 2:
           if (tag !== 18) {
@@ -414,15 +354,15 @@ export const UsersWithMeta: MessageFns<UsersWithMeta> = {
 
   fromJSON(object: any): UsersWithMeta {
     return {
-      users: isSet(object.users) ? UserList.fromJSON(object.users) : undefined,
+      users: globalThis.Array.isArray(object?.users) ? object.users.map((e: any) => User.fromJSON(e)) : [],
       meta: isSet(object.meta) ? Meta.fromJSON(object.meta) : undefined,
     };
   },
 
   toJSON(message: UsersWithMeta): unknown {
     const obj: any = {};
-    if (message.users !== undefined) {
-      obj.users = UserList.toJSON(message.users);
+    if (message.users?.length) {
+      obj.users = message.users.map((e) => User.toJSON(e));
     }
     if (message.meta !== undefined) {
       obj.meta = Meta.toJSON(message.meta);
@@ -435,9 +375,7 @@ export const UsersWithMeta: MessageFns<UsersWithMeta> = {
   },
   fromPartial<I extends Exact<DeepPartial<UsersWithMeta>, I>>(object: I): UsersWithMeta {
     const message = createBaseUsersWithMeta();
-    message.users = (object.users !== undefined && object.users !== null)
-      ? UserList.fromPartial(object.users)
-      : undefined;
+    message.users = object.users?.map((e) => User.fromPartial(e)) || [];
     message.meta = (object.meta !== undefined && object.meta !== null) ? Meta.fromPartial(object.meta) : undefined;
     return message;
   },
@@ -962,7 +900,7 @@ export const CreateUserResponse: MessageFns<CreateUserResponse> = {
 };
 
 function createBaseUpdateUserRequest(): UpdateUserRequest {
-  return { id: "", name: undefined, email: undefined, verified: undefined };
+  return { id: "", name: undefined, email: undefined, password: undefined, verified: undefined };
 }
 
 export const UpdateUserRequest: MessageFns<UpdateUserRequest> = {
@@ -976,8 +914,11 @@ export const UpdateUserRequest: MessageFns<UpdateUserRequest> = {
     if (message.email !== undefined) {
       writer.uint32(26).string(message.email);
     }
+    if (message.password !== undefined) {
+      writer.uint32(34).string(message.password);
+    }
     if (message.verified !== undefined) {
-      writer.uint32(32).bool(message.verified);
+      writer.uint32(40).bool(message.verified);
     }
     return writer;
   },
@@ -1011,7 +952,14 @@ export const UpdateUserRequest: MessageFns<UpdateUserRequest> = {
           message.email = reader.string();
           continue;
         case 4:
-          if (tag !== 32) {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.password = reader.string();
+          continue;
+        case 5:
+          if (tag !== 40) {
             break;
           }
 
@@ -1031,6 +979,7 @@ export const UpdateUserRequest: MessageFns<UpdateUserRequest> = {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
       name: isSet(object.name) ? globalThis.String(object.name) : undefined,
       email: isSet(object.email) ? globalThis.String(object.email) : undefined,
+      password: isSet(object.password) ? globalThis.String(object.password) : undefined,
       verified: isSet(object.verified) ? globalThis.Boolean(object.verified) : undefined,
     };
   },
@@ -1046,6 +995,9 @@ export const UpdateUserRequest: MessageFns<UpdateUserRequest> = {
     if (message.email !== undefined) {
       obj.email = message.email;
     }
+    if (message.password !== undefined) {
+      obj.password = message.password;
+    }
     if (message.verified !== undefined) {
       obj.verified = message.verified;
     }
@@ -1060,6 +1012,7 @@ export const UpdateUserRequest: MessageFns<UpdateUserRequest> = {
     message.id = object.id ?? "";
     message.name = object.name ?? undefined;
     message.email = object.email ?? undefined;
+    message.password = object.password ?? undefined;
     message.verified = object.verified ?? undefined;
     return message;
   },

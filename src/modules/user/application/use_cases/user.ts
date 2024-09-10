@@ -62,24 +62,6 @@ export class UserUseCase {
   }
 
   /**
-   * @function getUserByEmail
-   * @description Get a user by email.
-   * @param email - Email of user.
-   * @returns {Promise<DTOUserResponse>} A promise that resolves to the DTOUserResponse.
-   * @example
-   * ```ts
-   * const email = 'test@email.com'
-   * const user = await userUseCase.getUserByEmail(email)
-   * ```
-  */
-  public async getUserByEmail(email: string): Promise<DTOUserResponse> {
-    getUserByEmailSchema.parse({ email })
-
-    const userObtained = await this.userRepository.getUserByEmail(email)
-    return new DTOUserResponse(userObtained)
-  }
-
-  /**
    * @function getUsers
    * @description Get a page of users.
    * @param offset - The offset of the page.
@@ -97,43 +79,5 @@ export class UserUseCase {
 
     const usersObtained = await this.userRepository.getUsers(offset, limit)
     return usersObtained.map(user => new DTOUserResponse(user))
-  }
-
-  /**
-   * @function count
-   * @description Get the count of users.
-   * @returns {Promise<number>} A promise that resolves to a number of users.
-   * @example
-   * ```ts
-   * const count = await userUseCase.count()
-   * ```
-  */
-  public async count(): Promise<number> {
-    return this.userRepository.count()
-  }
-
-  /**
-   * @function createUser
-   * @description Create a new user. This method hashes the user's password using bcrypt before saving the user.
-   * @param user - User to be created.
-   * @returns {Promise<DTOUserResponse>} A promise that resolves to the user's DTOUserResponse created.
-   * @example
-   * ```ts
-   * const user = {
-   *  name: 'Test',
-   *  email: 'test@email.com',
-   *  password: '12345678'
-   * }
-   * const newUser = await userUseCase.createUser(user)
-   * ```
-  */
-  public async createUser(user: DTOUserCreate): Promise<DTOUserResponse> {
-    createUserSchema.parse(user)
-
-    const password = await bcrypt.hash(user.password, 10)
-    user.password = password
-    const userValue = new UserValue(user.name, user.email, user.password)
-    await this.userRepository.createUser(userValue)
-    return new DTOUserResponse(userValue)
   }
 }

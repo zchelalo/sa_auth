@@ -41,7 +41,9 @@ const envVars = {
    */
   ACCESS_TOKEN_DURATION_IN_MINUTES: Number(process.env.ACCESS_TOKEN_DURATION_IN_MINUTES),
   REFRESH_TOKEN_DURATION_IN_DAYS: Number(process.env.REFRESH_TOKEN_DURATION_IN_DAYS),
-  RECOVER_TOKEN_DURATION_IN_MINUTES: Number(process.env.RECOVER_TOKEN_DURATION_IN_MINUTES)
+  RECOVER_TOKEN_DURATION_IN_MINUTES: Number(process.env.RECOVER_TOKEN_DURATION_IN_MINUTES),
+
+  USER_MS_URL: process.env.USER_MS_URL
 }
 
 /**
@@ -61,7 +63,9 @@ const config = z.object({
 
   ACCESS_TOKEN_DURATION_IN_MINUTES: z.number().int(),
   REFRESH_TOKEN_DURATION_IN_DAYS: z.number().int(),
-  RECOVER_TOKEN_DURATION_IN_MINUTES: z.number().int()
+  RECOVER_TOKEN_DURATION_IN_MINUTES: z.number().int(),
+
+  USER_MS_URL: z.string()
 })
 
 /**

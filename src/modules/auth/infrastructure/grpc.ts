@@ -2,7 +2,7 @@ import { AuthServiceServer } from 'src/proto/auth/service'
 
 import { AuthUseCase } from 'src/modules/auth/application/use_cases/auth'
 import { PostgresRepository as AuthPostgresRepository } from 'src/modules/auth/infrastructure/repositories/postgres'
-import { PostgresRepository as UserPostgresRepository } from 'src/modules/user/infrastructure/repositories/postgres'
+import { GrpcRepository as UserPostgresRepository } from 'src/modules/user/infrastructure/repositories/grpc'
 import { AuthController } from './controller'
 import { logRequestMiddleware } from 'src/middlewares/log_request'
 import { applyMiddleware } from 'src/middlewares/base'

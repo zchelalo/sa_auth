@@ -31,7 +31,7 @@ export class UserValue implements UserEntity {
    * The password of the user, stored as a hashed string.
    * @type {string}
   */
-  readonly password: string
+  readonly password?: string
 
   /**
    * A boolean value indicating whether the user is verified.
@@ -46,7 +46,7 @@ export class UserValue implements UserEntity {
    * @param {string} email - The email address of the user.
    * @param {string} password - The password of the user.
   */
-  constructor(name: string, email: string, password: string) {
+  constructor(name: string, email: string, password?: string) {
     this.id = uuid()
     this.name = name
     this.email = email

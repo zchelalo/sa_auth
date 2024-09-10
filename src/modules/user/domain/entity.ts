@@ -29,7 +29,7 @@ export interface UserEntity {
    * The password of the user, stored as a hashed string.
    * @type {string}
   */
-  password: string
+  password?: string
 
   /**
    * A boolean value indicating whether the user is verified.

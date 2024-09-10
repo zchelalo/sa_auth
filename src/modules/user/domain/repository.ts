@@ -17,34 +17,35 @@ export interface UserRepository {
   getUserById(uuid: string): Promise<UserEntity>
 
   /**
-   * Retrieves a user by their email address.
-   * 
-   * @param {string} email - The email address of the user.
-   * @returns {Promise<UserEntity>} A promise that resolves to the UserEntity.
-  */
-  getUserByEmail(email: string): Promise<UserEntity>
-
-  /**
    * Retrieves a list of users with pagination.
    * 
-   * @param {number} offset - The offset for pagination.
+   * @param {number} page - The page for pagination.
    * @param {number} limit - The limit of users to retrieve.
    * @returns {Promise<UserEntity[]>} A promise that resolves to an array of UserEntity objects.
   */
-  getUsers(offset: number, limit: number): Promise<UserEntity[]>
+  getUsers(page: number, limit: number): Promise<UserEntity[]>
 
-  /**
-   * Retrieves the total count of users.
-   * 
-   * @returns {Promise<number>} A promise that resolves to the number of users.
-  */
-  count(): Promise<number>
+  // /**
+  //  * Creates a new user.
+  //  * 
+  //  * @param {UserEntity} user - The user entity to be created.
+  //  * @returns {Promise<UserEntity>} A promise that resolves to the newly created UserEntity.
+  // */
+  // createUser(user: UserEntity): Promise<UserEntity>
 
-  /**
-   * Creates a new user.
-   * 
-   * @param {UserEntity} user - The user entity to be created.
-   * @returns {Promise<UserEntity>} A promise that resolves to the newly created UserEntity.
-  */
-  createUser(user: UserEntity): Promise<UserEntity>
+  // /**
+  //  * Updates an existing user.
+  //  * 
+  //  * @param {UserEntity} user - The user entity to be updated.
+  //  * @returns {Promise<UserEntity>} A promise that resolves to the updated UserEntity.
+  // */
+  // updateUser(user: UserEntity): Promise<UserEntity>
+
+  // /**
+  //  * Deletes a user by their unique identifier (UUID).
+  //  * 
+  //  * @param {string} uuid - The unique identifier of the user.
+  //  * @returns {Promise<void>} A promise that resolves when the user is successfully deleted.
+  // */
+  // deleteUser(uuid: string): Promise<void>
 }
