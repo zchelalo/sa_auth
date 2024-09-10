@@ -16,6 +16,7 @@ import { InternalServerError, UnauthorizedError } from 'src/helpers/errors/custo
 
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import { DTOUserResponse } from 'src/modules/user/application/dtos/user_response'
 
 /**
  * Create a new Auth Use Case.
@@ -75,9 +76,13 @@ export class AuthUseCase {
   public async signIn(email: string, password: string): Promise<DTOAuthResponse> {
     signInSchema.parse({ email, password })
 
-    const userData = await this.userRepository.getUserPasswordHashAndId(email)
+    const userData = await this.userRepository.getUserToAuth(email)
 
-    const isPasswordMatch = await bcrypt.compare(password, userData.hash)
+    if (!userData.password) {
+      throw new UnauthorizedError()
+    }
+
+    const isPasswordMatch = await bcrypt.compare(password, userData.password)
     if (!isPasswordMatch) {
       throw new UnauthorizedError()
     }
@@ -89,12 +94,12 @@ export class AuthUseCase {
     const newToken = new TokenValue(refreshToken, userData.id, tokenType.id)
     await this.authRepository.saveToken(newToken)
 
-    const userObtained = await this.userRepository.getUserById(userData.id)
+    const dtoUserResponse = new DTOUserResponse(userData)
 
     const authValue = new DTOAuthResponse({
       accessToken,
       refreshToken,
-      user: userObtained
+      user: dtoUserResponse
     })
 
     return authValue

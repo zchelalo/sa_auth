@@ -1,12 +1,12 @@
 import * as grpc from '@grpc/grpc-js'
-import { PasswordHashAndId, UserServiceClient } from 'src/proto/user/service'
+import { UserServiceClient } from 'src/proto/user/service'
 import {
   GetUsersRequest,
   GetUsersResponse,
   GetUserRequest,
   GetUserResponse,
-  GetUserPasswordHashRequest,
-  GetUserPasswordHashResponse
+  GetUserToAuthRequest,
+  GetUserToAuthResponse
 } from 'src/proto/user/service'
 import { UserRepository } from '../../domain/repository'
 import { UserEntity } from '../../domain/entity'
@@ -103,13 +103,13 @@ export class GrpcRepository implements UserRepository {
     return new DTOUserResponse(response.user)
   }
 
-  public async getUserPasswordHashAndId(email: string): Promise<PasswordHashAndId> {
-    const request: GetUserPasswordHashRequest = {
+  public async getUserToAuth(email: string): Promise<UserEntity> {
+    const request: GetUserToAuthRequest = {
       email
     }
 
-    const response = await new Promise<GetUserPasswordHashResponse>((resolve, reject) => {
-      this.client.getUserPasswordHash(request, (error, response: GetUserPasswordHashResponse) => {
+    const response = await new Promise<GetUserToAuthResponse>((resolve, reject) => {
+      this.client.getUserToAuth(request, (error, response: GetUserToAuthResponse) => {
         if (error) {
           logger.error(error.message)
           reject(new Error(error.message))
@@ -122,7 +122,7 @@ export class GrpcRepository implements UserRepository {
           return
         }
 
-        if (!response.data) {
+        if (!response.user) {
           logger.error('No se encontró el usuario')
           reject(new Error('No se encontró el usuario'))
           return
@@ -132,7 +132,7 @@ export class GrpcRepository implements UserRepository {
       })
     })
 
-    if (!response.data) {
+    if (!response.user) {
       if (response.error) {
         throw new Error(response.error.message)
       }
@@ -140,6 +140,6 @@ export class GrpcRepository implements UserRepository {
       throw new Error('No se encontró el usuario')
     }
 
-    return response.data
+    return response.user
   }
 }

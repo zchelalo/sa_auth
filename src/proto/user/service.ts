@@ -28,9 +28,12 @@ export interface User {
   verified: boolean;
 }
 
-export interface PasswordHashAndId {
+export interface UserWithPassword {
   id: string;
-  hash: string;
+  name: string;
+  email: string;
+  password: string;
+  verified: boolean;
 }
 
 export interface Meta {
@@ -61,12 +64,12 @@ export interface GetUserResponse {
   error?: Error | undefined;
 }
 
-export interface GetUserPasswordHashRequest {
+export interface GetUserToAuthRequest {
   email: string;
 }
 
-export interface GetUserPasswordHashResponse {
-  data?: PasswordHashAndId | undefined;
+export interface GetUserToAuthResponse {
+  user?: UserWithPassword | undefined;
   error?: Error | undefined;
 }
 
@@ -217,25 +220,34 @@ export const User: MessageFns<User> = {
   },
 };
 
-function createBasePasswordHashAndId(): PasswordHashAndId {
-  return { id: "", hash: "" };
+function createBaseUserWithPassword(): UserWithPassword {
+  return { id: "", name: "", email: "", password: "", verified: false };
 }
 
-export const PasswordHashAndId: MessageFns<PasswordHashAndId> = {
-  encode(message: PasswordHashAndId, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const UserWithPassword: MessageFns<UserWithPassword> = {
+  encode(message: UserWithPassword, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
-    if (message.hash !== "") {
-      writer.uint32(18).string(message.hash);
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
+    }
+    if (message.email !== "") {
+      writer.uint32(26).string(message.email);
+    }
+    if (message.password !== "") {
+      writer.uint32(34).string(message.password);
+    }
+    if (message.verified !== false) {
+      writer.uint32(40).bool(message.verified);
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): PasswordHashAndId {
+  decode(input: BinaryReader | Uint8Array, length?: number): UserWithPassword {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBasePasswordHashAndId();
+    const message = createBaseUserWithPassword();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -251,7 +263,28 @@ export const PasswordHashAndId: MessageFns<PasswordHashAndId> = {
             break;
           }
 
-          message.hash = reader.string();
+          message.name = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.email = reader.string();
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.password = reader.string();
+          continue;
+        case 5:
+          if (tag !== 40) {
+            break;
+          }
+
+          message.verified = reader.bool();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -262,31 +295,46 @@ export const PasswordHashAndId: MessageFns<PasswordHashAndId> = {
     return message;
   },
 
-  fromJSON(object: any): PasswordHashAndId {
+  fromJSON(object: any): UserWithPassword {
     return {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
-      hash: isSet(object.hash) ? globalThis.String(object.hash) : "",
+      name: isSet(object.name) ? globalThis.String(object.name) : "",
+      email: isSet(object.email) ? globalThis.String(object.email) : "",
+      password: isSet(object.password) ? globalThis.String(object.password) : "",
+      verified: isSet(object.verified) ? globalThis.Boolean(object.verified) : false,
     };
   },
 
-  toJSON(message: PasswordHashAndId): unknown {
+  toJSON(message: UserWithPassword): unknown {
     const obj: any = {};
     if (message.id !== "") {
       obj.id = message.id;
     }
-    if (message.hash !== "") {
-      obj.hash = message.hash;
+    if (message.name !== "") {
+      obj.name = message.name;
+    }
+    if (message.email !== "") {
+      obj.email = message.email;
+    }
+    if (message.password !== "") {
+      obj.password = message.password;
+    }
+    if (message.verified !== false) {
+      obj.verified = message.verified;
     }
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<PasswordHashAndId>, I>>(base?: I): PasswordHashAndId {
-    return PasswordHashAndId.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<UserWithPassword>, I>>(base?: I): UserWithPassword {
+    return UserWithPassword.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<PasswordHashAndId>, I>>(object: I): PasswordHashAndId {
-    const message = createBasePasswordHashAndId();
+  fromPartial<I extends Exact<DeepPartial<UserWithPassword>, I>>(object: I): UserWithPassword {
+    const message = createBaseUserWithPassword();
     message.id = object.id ?? "";
-    message.hash = object.hash ?? "";
+    message.name = object.name ?? "";
+    message.email = object.email ?? "";
+    message.password = object.password ?? "";
+    message.verified = object.verified ?? false;
     return message;
   },
 };
@@ -674,22 +722,22 @@ export const GetUserResponse: MessageFns<GetUserResponse> = {
   },
 };
 
-function createBaseGetUserPasswordHashRequest(): GetUserPasswordHashRequest {
+function createBaseGetUserToAuthRequest(): GetUserToAuthRequest {
   return { email: "" };
 }
 
-export const GetUserPasswordHashRequest: MessageFns<GetUserPasswordHashRequest> = {
-  encode(message: GetUserPasswordHashRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const GetUserToAuthRequest: MessageFns<GetUserToAuthRequest> = {
+  encode(message: GetUserToAuthRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.email !== "") {
       writer.uint32(10).string(message.email);
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): GetUserPasswordHashRequest {
+  decode(input: BinaryReader | Uint8Array, length?: number): GetUserToAuthRequest {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGetUserPasswordHashRequest();
+    const message = createBaseGetUserToAuthRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -709,11 +757,11 @@ export const GetUserPasswordHashRequest: MessageFns<GetUserPasswordHashRequest> 
     return message;
   },
 
-  fromJSON(object: any): GetUserPasswordHashRequest {
+  fromJSON(object: any): GetUserToAuthRequest {
     return { email: isSet(object.email) ? globalThis.String(object.email) : "" };
   },
 
-  toJSON(message: GetUserPasswordHashRequest): unknown {
+  toJSON(message: GetUserToAuthRequest): unknown {
     const obj: any = {};
     if (message.email !== "") {
       obj.email = message.email;
@@ -721,24 +769,24 @@ export const GetUserPasswordHashRequest: MessageFns<GetUserPasswordHashRequest> 
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<GetUserPasswordHashRequest>, I>>(base?: I): GetUserPasswordHashRequest {
-    return GetUserPasswordHashRequest.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<GetUserToAuthRequest>, I>>(base?: I): GetUserToAuthRequest {
+    return GetUserToAuthRequest.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<GetUserPasswordHashRequest>, I>>(object: I): GetUserPasswordHashRequest {
-    const message = createBaseGetUserPasswordHashRequest();
+  fromPartial<I extends Exact<DeepPartial<GetUserToAuthRequest>, I>>(object: I): GetUserToAuthRequest {
+    const message = createBaseGetUserToAuthRequest();
     message.email = object.email ?? "";
     return message;
   },
 };
 
-function createBaseGetUserPasswordHashResponse(): GetUserPasswordHashResponse {
-  return { data: undefined, error: undefined };
+function createBaseGetUserToAuthResponse(): GetUserToAuthResponse {
+  return { user: undefined, error: undefined };
 }
 
-export const GetUserPasswordHashResponse: MessageFns<GetUserPasswordHashResponse> = {
-  encode(message: GetUserPasswordHashResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.data !== undefined) {
-      PasswordHashAndId.encode(message.data, writer.uint32(10).fork()).join();
+export const GetUserToAuthResponse: MessageFns<GetUserToAuthResponse> = {
+  encode(message: GetUserToAuthResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.user !== undefined) {
+      UserWithPassword.encode(message.user, writer.uint32(10).fork()).join();
     }
     if (message.error !== undefined) {
       Error.encode(message.error, writer.uint32(18).fork()).join();
@@ -746,10 +794,10 @@ export const GetUserPasswordHashResponse: MessageFns<GetUserPasswordHashResponse
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): GetUserPasswordHashResponse {
+  decode(input: BinaryReader | Uint8Array, length?: number): GetUserToAuthResponse {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGetUserPasswordHashResponse();
+    const message = createBaseGetUserToAuthResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -758,7 +806,7 @@ export const GetUserPasswordHashResponse: MessageFns<GetUserPasswordHashResponse
             break;
           }
 
-          message.data = PasswordHashAndId.decode(reader, reader.uint32());
+          message.user = UserWithPassword.decode(reader, reader.uint32());
           continue;
         case 2:
           if (tag !== 18) {
@@ -776,17 +824,17 @@ export const GetUserPasswordHashResponse: MessageFns<GetUserPasswordHashResponse
     return message;
   },
 
-  fromJSON(object: any): GetUserPasswordHashResponse {
+  fromJSON(object: any): GetUserToAuthResponse {
     return {
-      data: isSet(object.data) ? PasswordHashAndId.fromJSON(object.data) : undefined,
+      user: isSet(object.user) ? UserWithPassword.fromJSON(object.user) : undefined,
       error: isSet(object.error) ? Error.fromJSON(object.error) : undefined,
     };
   },
 
-  toJSON(message: GetUserPasswordHashResponse): unknown {
+  toJSON(message: GetUserToAuthResponse): unknown {
     const obj: any = {};
-    if (message.data !== undefined) {
-      obj.data = PasswordHashAndId.toJSON(message.data);
+    if (message.user !== undefined) {
+      obj.user = UserWithPassword.toJSON(message.user);
     }
     if (message.error !== undefined) {
       obj.error = Error.toJSON(message.error);
@@ -794,13 +842,13 @@ export const GetUserPasswordHashResponse: MessageFns<GetUserPasswordHashResponse
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<GetUserPasswordHashResponse>, I>>(base?: I): GetUserPasswordHashResponse {
-    return GetUserPasswordHashResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<GetUserToAuthResponse>, I>>(base?: I): GetUserToAuthResponse {
+    return GetUserToAuthResponse.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<GetUserPasswordHashResponse>, I>>(object: I): GetUserPasswordHashResponse {
-    const message = createBaseGetUserPasswordHashResponse();
-    message.data = (object.data !== undefined && object.data !== null)
-      ? PasswordHashAndId.fromPartial(object.data)
+  fromPartial<I extends Exact<DeepPartial<GetUserToAuthResponse>, I>>(object: I): GetUserToAuthResponse {
+    const message = createBaseGetUserToAuthResponse();
+    message.user = (object.user !== undefined && object.user !== null)
+      ? UserWithPassword.fromPartial(object.user)
       : undefined;
     message.error = (object.error !== undefined && object.error !== null) ? Error.fromPartial(object.error) : undefined;
     return message;
@@ -1455,16 +1503,14 @@ export const UserServiceService = {
     responseSerialize: (value: GetUserResponse) => Buffer.from(GetUserResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => GetUserResponse.decode(value),
   },
-  getUserPasswordHash: {
-    path: "/UserService/getUserPasswordHash",
+  getUserToAuth: {
+    path: "/UserService/getUserToAuth",
     requestStream: false,
     responseStream: false,
-    requestSerialize: (value: GetUserPasswordHashRequest) =>
-      Buffer.from(GetUserPasswordHashRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => GetUserPasswordHashRequest.decode(value),
-    responseSerialize: (value: GetUserPasswordHashResponse) =>
-      Buffer.from(GetUserPasswordHashResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => GetUserPasswordHashResponse.decode(value),
+    requestSerialize: (value: GetUserToAuthRequest) => Buffer.from(GetUserToAuthRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetUserToAuthRequest.decode(value),
+    responseSerialize: (value: GetUserToAuthResponse) => Buffer.from(GetUserToAuthResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetUserToAuthResponse.decode(value),
   },
   getUsers: {
     path: "/UserService/getUsers",
@@ -1506,7 +1552,7 @@ export const UserServiceService = {
 
 export interface UserServiceServer extends UntypedServiceImplementation {
   getUser: handleUnaryCall<GetUserRequest, GetUserResponse>;
-  getUserPasswordHash: handleUnaryCall<GetUserPasswordHashRequest, GetUserPasswordHashResponse>;
+  getUserToAuth: handleUnaryCall<GetUserToAuthRequest, GetUserToAuthResponse>;
   getUsers: handleUnaryCall<GetUsersRequest, GetUsersResponse>;
   createUser: handleUnaryCall<CreateUserRequest, CreateUserResponse>;
   updateUser: handleUnaryCall<UpdateUserRequest, UpdateUserResponse>;
@@ -1529,20 +1575,20 @@ export interface UserServiceClient extends Client {
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: GetUserResponse) => void,
   ): ClientUnaryCall;
-  getUserPasswordHash(
-    request: GetUserPasswordHashRequest,
-    callback: (error: ServiceError | null, response: GetUserPasswordHashResponse) => void,
+  getUserToAuth(
+    request: GetUserToAuthRequest,
+    callback: (error: ServiceError | null, response: GetUserToAuthResponse) => void,
   ): ClientUnaryCall;
-  getUserPasswordHash(
-    request: GetUserPasswordHashRequest,
+  getUserToAuth(
+    request: GetUserToAuthRequest,
     metadata: Metadata,
-    callback: (error: ServiceError | null, response: GetUserPasswordHashResponse) => void,
+    callback: (error: ServiceError | null, response: GetUserToAuthResponse) => void,
   ): ClientUnaryCall;
-  getUserPasswordHash(
-    request: GetUserPasswordHashRequest,
+  getUserToAuth(
+    request: GetUserToAuthRequest,
     metadata: Metadata,
     options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: GetUserPasswordHashResponse) => void,
+    callback: (error: ServiceError | null, response: GetUserToAuthResponse) => void,
   ): ClientUnaryCall;
   getUsers(
     request: GetUsersRequest,
