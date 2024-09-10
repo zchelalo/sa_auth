@@ -1,4 +1,3 @@
-import * as grpc from '@grpc/grpc-js'
 import { UserServiceClient } from 'src/proto/user/service'
 import {
   GetUsersRequest,
@@ -18,6 +17,8 @@ import { UserRepository } from '../../domain/repository'
 import { UserEntity } from '../../domain/entity'
 import { logger } from 'src/helpers/logger'
 import { DTOUserResponse } from '../../application/dtos/user_response'
+import { grpcCodeToError } from 'src/helpers/errors/handler'
+import { InternalServerError } from 'src/helpers/errors/custom_error'
 
 export class GrpcRepository implements UserRepository {
   readonly client: UserServiceClient
@@ -36,13 +37,15 @@ export class GrpcRepository implements UserRepository {
       this.client.getUsers(request, (error, response: GetUsersResponse) => {
         if (error) {
           logger.error(error.message)
-          reject(new Error(error.message))
+          const errorToThrow = grpcCodeToError(error.code, error.message)
+          reject(errorToThrow)
           return
         }
 
         if (response.error) {
-          logger.error(response.error)
-          reject(new Error(response.error.message))
+          const errorToThrow = grpcCodeToError(response.error.code, response.error.message)
+          logger.error(errorToThrow.message)
+          reject(errorToThrow)
           return
         }
 
@@ -51,8 +54,9 @@ export class GrpcRepository implements UserRepository {
     })
 
     if (!response.data) {
-      logger.error('No se encontraron usuarios')
-      throw new Error('No se encontraron usuarios')
+      const errorToThrow = new InternalServerError('users not found')
+      logger.error(errorToThrow.message)
+      throw errorToThrow
     }
 
     const usersObtained = response.data.users.map(user => new DTOUserResponse(user))
@@ -68,13 +72,15 @@ export class GrpcRepository implements UserRepository {
       this.client.getUser(request, (error, response: GetUserResponse) => {
         if (error) {
           logger.error(error.message)
-          reject(new Error(error.message))
+          const errorToThrow = grpcCodeToError(error.code, error.message)
+          reject(errorToThrow)
           return
         }
 
         if (response.error) {
-          logger.error(response.error)
-          reject(new Error(response.error.message))
+          const errorToThrow = grpcCodeToError(response.error.code, response.error.message)
+          logger.error(errorToThrow.message)
+          reject(errorToThrow)
           return
         }
 
@@ -83,8 +89,9 @@ export class GrpcRepository implements UserRepository {
     })
 
     if (!response.user) {
-      logger.error('No se encontró el usuario')
-      throw new Error('No se encontró el usuario')
+      const errorToThrow = new InternalServerError('user not found')
+      logger.error(errorToThrow.message)
+      throw errorToThrow
     }
 
     return new DTOUserResponse(response.user)
@@ -99,13 +106,15 @@ export class GrpcRepository implements UserRepository {
       this.client.getUserToAuth(request, (error, response: GetUserToAuthResponse) => {
         if (error) {
           logger.error(error.message)
-          reject(new Error(error.message))
+          const errorToThrow = grpcCodeToError(error.code, error.message)
+          reject(errorToThrow)
           return
         }
 
         if (response.error) {
-          logger.error(response.error)
-          reject(new Error(response.error.message))
+          const errorToThrow = grpcCodeToError(response.error.code, response.error.message)
+          logger.error(errorToThrow.message)
+          reject(errorToThrow)
           return
         }
 
@@ -114,8 +123,9 @@ export class GrpcRepository implements UserRepository {
     })
 
     if (!response.user) {
-      logger.error('No se encontró el usuario')
-      throw new Error('No se encontró el usuario')
+      const errorToThrow = new InternalServerError('user not found')
+      logger.error(errorToThrow.message)
+      throw errorToThrow
     }
 
     return response.user
@@ -136,13 +146,15 @@ export class GrpcRepository implements UserRepository {
       this.client.createUser(request, (error, response: CreateUserResponse) => {
         if (error) {
           logger.error(error.message)
-          reject(new Error(error.message))
+          const errorToThrow = grpcCodeToError(error.code, error.message)
+          reject(errorToThrow)
           return
         }
 
         if (response.error) {
-          logger.error(response.error)
-          reject(new Error(response.error.message))
+          const errorToThrow = grpcCodeToError(response.error.code, response.error.message)
+          logger.error(errorToThrow.message)
+          reject(errorToThrow)
           return
         }
 
@@ -151,8 +163,9 @@ export class GrpcRepository implements UserRepository {
     })
 
     if (!response.user) {
-      logger.error('No se encontró el usuario')
-      throw new Error('No se encontró el usuario')
+      const errorToThrow = new InternalServerError('user not found')
+      logger.error(errorToThrow.message)
+      throw errorToThrow
     }
 
     return response.user
@@ -175,13 +188,15 @@ export class GrpcRepository implements UserRepository {
       this.client.updateUser(request, (error, response: UpdateUserResponse) => {
         if (error) {
           logger.error(error.message)
-          reject(new Error(error.message))
+          const errorToThrow = grpcCodeToError(error.code, error.message)
+          reject(errorToThrow)
           return
         }
 
         if (response.error) {
-          logger.error(response.error)
-          reject(new Error(response.error.message))
+          const errorToThrow = grpcCodeToError(response.error.code, response.error.message)
+          logger.error(errorToThrow.message)
+          reject(errorToThrow)
           return
         }
 
@@ -190,8 +205,9 @@ export class GrpcRepository implements UserRepository {
     })
 
     if (!response.user) {
-      logger.error('No se encontró el usuario')
-      throw new Error('No se encontró el usuario')
+      const errorToThrow = new InternalServerError('user not found')
+      logger.error(errorToThrow.message)
+      throw errorToThrow
     }
 
     return response.user

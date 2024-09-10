@@ -1,3 +1,5 @@
+import * as grpc from '@grpc/grpc-js'
+
 /**
  * Custom error class. This class extends the Error class and adds a status code to the error object.
  * 
@@ -10,19 +12,19 @@
 */
 export class CustomError extends Error {
   /**
-   * @property {number} statusCode - HTTP status code of the error.
+   * @property {grpc.status} grpcCode - GRPC status code of the error.
   */
-  public statusCode: number
+  public grpcCode: number
   
   /**
    * Creates an instance of CustomError.
    * 
-   * @param {number} statusCode - HTTP status code of the error.
+   * @param {grpc.status} grpcCode - GRPC status code of the error.
    * @param {string} message - Error message.
   */
-  constructor(statusCode: number = 500, message: string) {
+  constructor(grpcCode: grpc.status = grpc.status.INTERNAL, message: string) {
     super(message)
-    this.statusCode = statusCode
+    this.grpcCode = grpcCode
     this.name = this.constructor.name
     Error.captureStackTrace(this, this.constructor)
   }
@@ -45,7 +47,7 @@ export class BadRequestError extends CustomError {
    * @param {string} message - Error message.
   */
   constructor(message: string) {
-    super(400, `Bad request: ${message}`) // 400 Bad Request
+    super(grpc.status.INVALID_ARGUMENT, `Bad request: ${message}`) // 400 Bad Request
   }
 }
 
@@ -64,7 +66,7 @@ export class UnauthorizedError extends CustomError {
    * Creates an instance of UnauthorizedError.
   */
   constructor() {
-    super(401, 'Unauthorized') // 401 Unauthorized
+    super(grpc.status.UNAUTHENTICATED, 'Unauthorized') // 401 Unauthorized
   }
 }
 
@@ -83,7 +85,7 @@ export class ForbiddenError extends CustomError {
    * Creates an instance of ForbiddenError.
   */
   constructor() {
-    super(403, 'Forbidden') // 403 Forbidden
+    super(grpc.status.PERMISSION_DENIED, 'Forbidden') // 403 Forbidden
   }
 }
 
@@ -104,7 +106,7 @@ export class NotFoundError extends CustomError {
    * @param {string} resource - The resource that was not found.
   */
   constructor(resource: string) {
-    super(404, `${resource} not found`) // 404 Not Found
+    super(grpc.status.NOT_FOUND, `${resource} not found`) // 404 Not Found
   }
 }
 
@@ -125,7 +127,7 @@ export class ConflictError extends CustomError {
    * @param {string} message - Error message.
   */
   constructor(message: string) {
-    super(409, `Conflict: ${message}`) // 409 Conflict
+    super(grpc.status.ALREADY_EXISTS, `Conflict: ${message}`) // 409 Conflict
   }
 }
 
@@ -146,27 +148,6 @@ export class InternalServerError extends CustomError {
    * @param {string} message - Error message.
   */
   constructor(message: string) {
-    super(500, `Internal server error: ${message}`) // 500 Internal Server Error
-  }
-}
-
-/**
- * Error class DatabaseError that extend the CustomError class.
- * 
- * @extends {CustomError}
- * @example
- * ```ts
- * throw new DatabaseError('connection failed')
- * ```
-*/
-export class DatabaseError extends CustomError {
-
-  /**
-   * Creates an instance of DatabaseError.
-   * 
-   * @param {string} message - Error message.
-  */
-  constructor(message: string) {
-    super(500, `Database error: ${message}`) // 500 Internal Server Error
+    super(grpc.status.INTERNAL, `Internal server error: ${message}`) // 500 Internal Server Error
   }
 }
