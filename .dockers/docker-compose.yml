@@ -10,12 +10,15 @@ services:
       context: ../
       dockerfile: ./.dockers/Dockerfile
     ports:
-      - 8002:8000
+      - 8002:8002
     volumes:
       - ../src:/app/src
     depends_on:
       sa_auth_db:
         condition: service_started
+    networks:
+      - saloncito
+      - sa_auth_network
 
   sa_auth_db:
     image: postgres:15.2
@@ -33,6 +36,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - sa_auth_network
 
   sa_auth_adminer:
     image: adminer
@@ -45,3 +50,11 @@ services:
     depends_on:
       sa_auth_db:
         condition: service_started
+    networks:
+      - sa_auth_network
+
+networks:
+  saloncito:
+    external: true
+  sa_auth_network:
+    driver: bridge

@@ -1,9 +1,3 @@
-import { user, userRelations } from './user'
-export {
-  user,
-  userRelations
-}
-
 import { token, tokenRelations } from './token'
 export {
   token,

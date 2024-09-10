@@ -54,3 +54,13 @@ export class UserValue implements UserEntity {
     this.verified = false
   }
 }
+
+export class HashedPasswordAndId {
+  readonly id: string
+  readonly hashedPassword: string
+
+  constructor(id: string, hashedPassword: string) {
+    this.id = id
+    this.hashedPassword = hashedPassword
+  }
+}

@@ -1,3 +1,4 @@
+import { PasswordHashAndId } from 'src/proto/user/service'
 import { UserEntity } from './entity'
 
 /**
@@ -15,6 +16,14 @@ export interface UserRepository {
    * @returns {Promise<UserEntity>} A promise that resolves to the UserEntity.
   */
   getUserById(uuid: string): Promise<UserEntity>
+
+  /**
+   * Retrieves a user by their email address.
+   * 
+   * @param {string} email - The email address of the user.
+   * @returns {Promise<string>} A promise that resolves to the Hashed Password.
+   */
+  getUserPasswordHashAndId(email: string): Promise<PasswordHashAndId>
 
   /**
    * Retrieves a list of users with pagination.

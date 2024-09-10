@@ -75,19 +75,21 @@ export class AuthUseCase {
   public async signIn(email: string, password: string): Promise<DTOAuthResponse> {
     signInSchema.parse({ email, password })
 
-    const userObtained = await this.userRepository.getUserByEmail(email)
+    const userData = await this.userRepository.getUserPasswordHashAndId(email)
 
-    const isPasswordMatch = await bcrypt.compare(password, userObtained.password)
+    const isPasswordMatch = await bcrypt.compare(password, userData.hash)
     if (!isPasswordMatch) {
       throw new UnauthorizedError()
     }
 
-    const accessToken = await createJWT({ sub: userObtained.id }, TokenType.ACCESS)
-    const refreshToken = await createJWT({ sub: userObtained.id }, TokenType.REFRESH)
+    const accessToken = await createJWT({ sub: userData.id }, TokenType.ACCESS)
+    const refreshToken = await createJWT({ sub: userData.id }, TokenType.REFRESH)
 
     const tokenType = await this.authRepository.getTokenTypeIdByKey(TokenType.REFRESH)
-    const newToken = new TokenValue(refreshToken, userObtained.id, tokenType.id)
+    const newToken = new TokenValue(refreshToken, userData.id, tokenType.id)
     await this.authRepository.saveToken(newToken)
+
+    const userObtained = await this.userRepository.getUserById(userData.id)
 
     const authValue = new DTOAuthResponse({
       accessToken,

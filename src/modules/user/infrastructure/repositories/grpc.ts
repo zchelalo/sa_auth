@@ -1,10 +1,12 @@
 import * as grpc from '@grpc/grpc-js'
-import { UserServiceClient } from 'src/proto/user/service'
+import { PasswordHashAndId, UserServiceClient } from 'src/proto/user/service'
 import {
   GetUsersRequest,
   GetUsersResponse,
   GetUserRequest,
-  GetUserResponse
+  GetUserResponse,
+  GetUserPasswordHashRequest,
+  GetUserPasswordHashResponse
 } from 'src/proto/user/service'
 import { UserRepository } from '../../domain/repository'
 import { UserEntity } from '../../domain/entity'
@@ -99,5 +101,45 @@ export class GrpcRepository implements UserRepository {
     }
 
     return new DTOUserResponse(response.user)
+  }
+
+  public async getUserPasswordHashAndId(email: string): Promise<PasswordHashAndId> {
+    const request: GetUserPasswordHashRequest = {
+      email
+    }
+
+    const response = await new Promise<GetUserPasswordHashResponse>((resolve, reject) => {
+      this.client.getUserPasswordHash(request, (error, response: GetUserPasswordHashResponse) => {
+        if (error) {
+          logger.error(error.message)
+          reject(new Error(error.message))
+          return
+        }
+
+        if (response.error) {
+          logger.error(response.error)
+          reject(new Error(response.error.message))
+          return
+        }
+
+        if (!response.data) {
+          logger.error('No se encontró el usuario')
+          reject(new Error('No se encontró el usuario'))
+          return
+        }
+
+        resolve(response)
+      })
+    })
+
+    if (!response.data) {
+      if (response.error) {
+        throw new Error(response.error.message)
+      }
+
+      throw new Error('No se encontró el usuario')
+    }
+
+    return response.data
   }
 }

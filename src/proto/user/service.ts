@@ -28,6 +28,11 @@ export interface User {
   verified: boolean;
 }
 
+export interface PasswordHashAndId {
+  id: string;
+  hash: string;
+}
+
 export interface Meta {
   page: number;
   perPage: number;
@@ -53,6 +58,15 @@ export interface GetUserRequest {
 
 export interface GetUserResponse {
   user?: User | undefined;
+  error?: Error | undefined;
+}
+
+export interface GetUserPasswordHashRequest {
+  email: string;
+}
+
+export interface GetUserPasswordHashResponse {
+  data?: PasswordHashAndId | undefined;
   error?: Error | undefined;
 }
 
@@ -199,6 +213,80 @@ export const User: MessageFns<User> = {
     message.name = object.name ?? "";
     message.email = object.email ?? "";
     message.verified = object.verified ?? false;
+    return message;
+  },
+};
+
+function createBasePasswordHashAndId(): PasswordHashAndId {
+  return { id: "", hash: "" };
+}
+
+export const PasswordHashAndId: MessageFns<PasswordHashAndId> = {
+  encode(message: PasswordHashAndId, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.hash !== "") {
+      writer.uint32(18).string(message.hash);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): PasswordHashAndId {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePasswordHashAndId();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.hash = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PasswordHashAndId {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      hash: isSet(object.hash) ? globalThis.String(object.hash) : "",
+    };
+  },
+
+  toJSON(message: PasswordHashAndId): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.hash !== "") {
+      obj.hash = message.hash;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<PasswordHashAndId>, I>>(base?: I): PasswordHashAndId {
+    return PasswordHashAndId.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<PasswordHashAndId>, I>>(object: I): PasswordHashAndId {
+    const message = createBasePasswordHashAndId();
+    message.id = object.id ?? "";
+    message.hash = object.hash ?? "";
     return message;
   },
 };
@@ -581,6 +669,139 @@ export const GetUserResponse: MessageFns<GetUserResponse> = {
   fromPartial<I extends Exact<DeepPartial<GetUserResponse>, I>>(object: I): GetUserResponse {
     const message = createBaseGetUserResponse();
     message.user = (object.user !== undefined && object.user !== null) ? User.fromPartial(object.user) : undefined;
+    message.error = (object.error !== undefined && object.error !== null) ? Error.fromPartial(object.error) : undefined;
+    return message;
+  },
+};
+
+function createBaseGetUserPasswordHashRequest(): GetUserPasswordHashRequest {
+  return { email: "" };
+}
+
+export const GetUserPasswordHashRequest: MessageFns<GetUserPasswordHashRequest> = {
+  encode(message: GetUserPasswordHashRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.email !== "") {
+      writer.uint32(10).string(message.email);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetUserPasswordHashRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetUserPasswordHashRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.email = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetUserPasswordHashRequest {
+    return { email: isSet(object.email) ? globalThis.String(object.email) : "" };
+  },
+
+  toJSON(message: GetUserPasswordHashRequest): unknown {
+    const obj: any = {};
+    if (message.email !== "") {
+      obj.email = message.email;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetUserPasswordHashRequest>, I>>(base?: I): GetUserPasswordHashRequest {
+    return GetUserPasswordHashRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetUserPasswordHashRequest>, I>>(object: I): GetUserPasswordHashRequest {
+    const message = createBaseGetUserPasswordHashRequest();
+    message.email = object.email ?? "";
+    return message;
+  },
+};
+
+function createBaseGetUserPasswordHashResponse(): GetUserPasswordHashResponse {
+  return { data: undefined, error: undefined };
+}
+
+export const GetUserPasswordHashResponse: MessageFns<GetUserPasswordHashResponse> = {
+  encode(message: GetUserPasswordHashResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.data !== undefined) {
+      PasswordHashAndId.encode(message.data, writer.uint32(10).fork()).join();
+    }
+    if (message.error !== undefined) {
+      Error.encode(message.error, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetUserPasswordHashResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetUserPasswordHashResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.data = PasswordHashAndId.decode(reader, reader.uint32());
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.error = Error.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetUserPasswordHashResponse {
+    return {
+      data: isSet(object.data) ? PasswordHashAndId.fromJSON(object.data) : undefined,
+      error: isSet(object.error) ? Error.fromJSON(object.error) : undefined,
+    };
+  },
+
+  toJSON(message: GetUserPasswordHashResponse): unknown {
+    const obj: any = {};
+    if (message.data !== undefined) {
+      obj.data = PasswordHashAndId.toJSON(message.data);
+    }
+    if (message.error !== undefined) {
+      obj.error = Error.toJSON(message.error);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetUserPasswordHashResponse>, I>>(base?: I): GetUserPasswordHashResponse {
+    return GetUserPasswordHashResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetUserPasswordHashResponse>, I>>(object: I): GetUserPasswordHashResponse {
+    const message = createBaseGetUserPasswordHashResponse();
+    message.data = (object.data !== undefined && object.data !== null)
+      ? PasswordHashAndId.fromPartial(object.data)
+      : undefined;
     message.error = (object.error !== undefined && object.error !== null) ? Error.fromPartial(object.error) : undefined;
     return message;
   },
@@ -1234,6 +1455,17 @@ export const UserServiceService = {
     responseSerialize: (value: GetUserResponse) => Buffer.from(GetUserResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => GetUserResponse.decode(value),
   },
+  getUserPasswordHash: {
+    path: "/UserService/getUserPasswordHash",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetUserPasswordHashRequest) =>
+      Buffer.from(GetUserPasswordHashRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetUserPasswordHashRequest.decode(value),
+    responseSerialize: (value: GetUserPasswordHashResponse) =>
+      Buffer.from(GetUserPasswordHashResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetUserPasswordHashResponse.decode(value),
+  },
   getUsers: {
     path: "/UserService/getUsers",
     requestStream: false,
@@ -1274,6 +1506,7 @@ export const UserServiceService = {
 
 export interface UserServiceServer extends UntypedServiceImplementation {
   getUser: handleUnaryCall<GetUserRequest, GetUserResponse>;
+  getUserPasswordHash: handleUnaryCall<GetUserPasswordHashRequest, GetUserPasswordHashResponse>;
   getUsers: handleUnaryCall<GetUsersRequest, GetUsersResponse>;
   createUser: handleUnaryCall<CreateUserRequest, CreateUserResponse>;
   updateUser: handleUnaryCall<UpdateUserRequest, UpdateUserResponse>;
@@ -1295,6 +1528,21 @@ export interface UserServiceClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: GetUserResponse) => void,
+  ): ClientUnaryCall;
+  getUserPasswordHash(
+    request: GetUserPasswordHashRequest,
+    callback: (error: ServiceError | null, response: GetUserPasswordHashResponse) => void,
+  ): ClientUnaryCall;
+  getUserPasswordHash(
+    request: GetUserPasswordHashRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: GetUserPasswordHashResponse) => void,
+  ): ClientUnaryCall;
+  getUserPasswordHash(
+    request: GetUserPasswordHashRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: GetUserPasswordHashResponse) => void,
   ): ClientUnaryCall;
   getUsers(
     request: GetUsersRequest,
