@@ -6,22 +6,23 @@ import {
   GetUserRequest,
   GetUserResponse,
   GetUserToAuthRequest,
-  GetUserToAuthResponse
+  GetUserToAuthResponse,
+
+  CreateUserRequest,
+  CreateUserResponse,
+
+  UpdateUserRequest,
+  UpdateUserResponse
 } from 'src/proto/user/service'
 import { UserRepository } from '../../domain/repository'
 import { UserEntity } from '../../domain/entity'
 import { logger } from 'src/helpers/logger'
 import { DTOUserResponse } from '../../application/dtos/user_response'
 
-const client = new UserServiceClient(
-  process.env.USER_MS_URL, // Dirección del servidor gRPC
-  grpc.credentials.createInsecure() // Configuración de credenciales
-)
-
 export class GrpcRepository implements UserRepository {
   readonly client: UserServiceClient
 
-  constructor() {
+  constructor(client: UserServiceClient) {
     this.client = client
   }
 
@@ -45,17 +46,12 @@ export class GrpcRepository implements UserRepository {
           return
         }
 
-        if (!response.data) {
-          logger.error('No se encontraron usuarios')
-          reject(new Error('No se encontraron usuarios'))
-          return
-        }
-
         resolve(response)
       })
     })
 
     if (!response.data) {
+      logger.error('No se encontraron usuarios')
       throw new Error('No se encontraron usuarios')
     }
 
@@ -82,21 +78,12 @@ export class GrpcRepository implements UserRepository {
           return
         }
 
-        if (!response.user) {
-          logger.error('No se encontró el usuario')
-          reject(new Error('No se encontró el usuario'))
-          return
-        }
-
         resolve(response)
       })
     })
 
     if (!response.user) {
-      if (response.error) {
-        throw new Error(response.error.message)
-      }
-
+      logger.error('No se encontró el usuario')
       throw new Error('No se encontró el usuario')
     }
 
@@ -122,9 +109,40 @@ export class GrpcRepository implements UserRepository {
           return
         }
 
-        if (!response.user) {
-          logger.error('No se encontró el usuario')
-          reject(new Error('No se encontró el usuario'))
+        resolve(response)
+      })
+    })
+
+    if (!response.user) {
+      logger.error('No se encontró el usuario')
+      throw new Error('No se encontró el usuario')
+    }
+
+    return response.user
+  }
+
+  public async createUser(user: UserEntity): Promise<UserEntity> {
+    if (!user.password) {
+      throw new Error('La contraseña es requerida')
+    }
+
+    const request: CreateUserRequest = {
+      name: user.name,
+      email: user.email,
+      password: user.password
+    }
+
+    const response = await new Promise<CreateUserResponse>((resolve, reject) => {
+      this.client.createUser(request, (error, response: CreateUserResponse) => {
+        if (error) {
+          logger.error(error.message)
+          reject(new Error(error.message))
+          return
+        }
+
+        if (response.error) {
+          logger.error(response.error)
+          reject(new Error(response.error.message))
           return
         }
 
@@ -133,10 +151,46 @@ export class GrpcRepository implements UserRepository {
     })
 
     if (!response.user) {
-      if (response.error) {
-        throw new Error(response.error.message)
-      }
+      logger.error('No se encontró el usuario')
+      throw new Error('No se encontró el usuario')
+    }
 
+    return response.user
+  }
+
+  public async updateUser(user: Partial<UserEntity>): Promise<UserEntity> {
+    if (!user.id) {
+      throw new Error('El ID del usuario es requerido')
+    }
+
+    const request: UpdateUserRequest = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      password: user.password,
+      verified: user.verified
+    }
+
+    const response = await new Promise<UpdateUserResponse>((resolve, reject) => {
+      this.client.updateUser(request, (error, response: UpdateUserResponse) => {
+        if (error) {
+          logger.error(error.message)
+          reject(new Error(error.message))
+          return
+        }
+
+        if (response.error) {
+          logger.error(response.error)
+          reject(new Error(response.error.message))
+          return
+        }
+
+        resolve(response)
+      })
+    })
+
+    if (!response.user) {
+      logger.error('No se encontró el usuario')
       throw new Error('No se encontró el usuario')
     }
 

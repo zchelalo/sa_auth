@@ -29,6 +29,11 @@ export class DTOUserCreate {
   constructor({ name, email, password }: UserValue) {
     this.name = name
     this.email = email
-    this.password = password
+
+    if (password) {
+      this.password = password
+    } else {
+      this.password = ''
+    }
   }
 }

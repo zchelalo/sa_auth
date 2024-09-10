@@ -123,9 +123,7 @@ export class AuthUseCase {
   public async signUp(user: DTOUserCreate): Promise<DTOAuthResponse> {
     createUserSchema.parse(user)
 
-    const hashedPassword = await bcrypt.hash(user.password, 10)
-
-    const newUser = new UserValue(user.name, user.email, hashedPassword)
+    const newUser = new UserValue(user.name, user.email, user.password)
     const userCreated = await this.userRepository.createUser(newUser)
 
     const accessToken = await createJWT({ sub: userCreated.id }, TokenType.ACCESS)

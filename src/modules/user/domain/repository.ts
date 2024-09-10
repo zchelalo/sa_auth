@@ -33,21 +33,21 @@ export interface UserRepository {
   */
   getUsers(page: number, limit: number): Promise<UserEntity[]>
 
-  // /**
-  //  * Creates a new user.
-  //  * 
-  //  * @param {UserEntity} user - The user entity to be created.
-  //  * @returns {Promise<UserEntity>} A promise that resolves to the newly created UserEntity.
-  // */
-  // createUser(user: UserEntity): Promise<UserEntity>
+  /**
+   * Creates a new user.
+   * 
+   * @param {UserEntity} user - The user entity to be created.
+   * @returns {Promise<UserEntity>} A promise that resolves to the newly created UserEntity.
+  */
+  createUser(user: UserEntity): Promise<UserEntity>
 
-  // /**
-  //  * Updates an existing user.
-  //  * 
-  //  * @param {UserEntity} user - The user entity to be updated.
-  //  * @returns {Promise<UserEntity>} A promise that resolves to the updated UserEntity.
-  // */
-  // updateUser(user: UserEntity): Promise<UserEntity>
+  /**
+   * Updates an existing user.
+   * 
+   * @param {Partial<UserEntity>} user - The user entity to be updated.
+   * @returns {Promise<UserEntity>} A promise that resolves to the updated UserEntity.
+  */
+  updateUser(user: Partial<UserEntity>): Promise<UserEntity>
 
   // /**
   //  * Deletes a user by their unique identifier (UUID).
