@@ -13,10 +13,10 @@ import {
   UpdateUserRequest,
   UpdateUserResponse
 } from 'src/proto/user/service'
-import { UserRepository } from '../../domain/repository'
-import { UserEntity } from '../../domain/entity'
+import { UserRepository } from 'src/modules/user/domain/repository'
+import { UserEntity } from 'src/modules/user/domain/entity'
 import { logger } from 'src/helpers/logger'
-import { DTOUserResponse } from '../../application/dtos/user_response'
+import { DTOUserResponse } from 'src/modules/user/application/dtos/user_response'
 import { grpcCodeToError } from 'src/helpers/errors/handler'
 import { InternalServerError } from 'src/helpers/errors/custom_error'
 

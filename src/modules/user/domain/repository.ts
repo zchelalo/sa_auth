@@ -1,4 +1,4 @@
-import { UserEntity } from './entity'
+import { UserEntity } from 'src/modules/user/domain/entity'
 
 /**
  * UserRepository interface.

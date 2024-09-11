@@ -3,7 +3,7 @@ import { AuthUseCase } from 'src/modules/auth/application/use_cases/auth'
 import * as grpc from '@grpc/grpc-js'
 import { Auth, SignInRequest, SignInResponse, SignOutRequest, SignOutResponse, SignUpRequest, SignUpResponse } from 'src/proto/auth/service'
 import { handlerErrors } from 'src/helpers/errors/handler'
-import { signInSchema, signUpSchema, tokenSchema } from '../application/schemas/auth'
+import { signInSchema, signUpSchema, tokenSchema } from 'src/modules/auth/application/schemas/auth'
 
 export class AuthController {
   private readonly useCase: AuthUseCase

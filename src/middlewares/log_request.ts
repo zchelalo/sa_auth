@@ -1,6 +1,6 @@
 import * as grpc from '@grpc/grpc-js'
 import { logger } from 'src/helpers/logger'
-import { Middleware } from './base'
+import { Middleware } from 'src/middlewares/base'
 
 export const logRequestMiddleware = <TRequest = any, TResponse = any>(): Middleware<TRequest, TResponse> => {
   return (
