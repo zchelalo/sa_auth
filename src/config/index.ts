@@ -20,7 +20,8 @@ const envVars = {
   /**
    * Port to run the server on
    */
-  PORT: Number(process.env.PORT),
+  GRPC_PORT: Number(process.env.GRPC_PORT),
+  REST_PORT: Number(process.env.REST_PORT),
 
   /**
    * Default limit for pagination
@@ -51,7 +52,8 @@ const envVars = {
  */
 const config = z.object({
   NODE_ENV: z.string(),
-  PORT: z.number().int(),
+  GRPC_PORT: z.number().int(),
+  REST_PORT: z.number().int(),
 
   PAGINATION_LIMIT_DEFAULT: z.number().int(),
 

@@ -13,5 +13,6 @@ COPY ../.env .
 COPY ../.env.test .
 COPY ../certs certs
 COPY ../src src
+COPY ../scripts scripts
 
 CMD ["npm", "run", "dev"]

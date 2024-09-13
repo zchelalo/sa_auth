@@ -7,5 +7,7 @@ logs
 coverage
 src/data/drizzle/migrations/*
 !src/data/drizzle/migrations/.gitkeep
-certs/*
-!certs/.gitkeep
+certs/rsa/*
+certs/jwks/*
+!certs/rsa/.gitkeep
+!certs/jwks/.gitkeep
