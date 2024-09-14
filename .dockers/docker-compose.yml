@@ -11,7 +11,6 @@ services:
       dockerfile: ./.dockers/Dockerfile
     ports:
       - 8002:8002
-      - 8003:8003
     volumes:
       - ../src:/app/src
     depends_on:

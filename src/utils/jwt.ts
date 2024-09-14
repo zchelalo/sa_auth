@@ -18,20 +18,20 @@ enum certType {
  */
 const tokenPaths = {
   access: {
-    private: '../../certs/private_access.pem',
-    public: '../../certs/public_access.pem'
+    private: '../../certs/rsa/private_access.pem',
+    public: '../../certs/rsa/public_access.pem'
   },
   refresh: {
-    private: '../../certs/private_refresh.pem',
-    public: '../../certs/public_refresh.pem'
+    private: '../../certs/rsa/private_refresh.pem',
+    public: '../../certs/rsa/public_refresh.pem'
   },
   verify: {
-    private: '../../certs/private_verify.pem',
-    public: '../../certs/public_verify.pem'
+    private: '../../certs/rsa/private_verify.pem',
+    public: '../../certs/rsa/public_verify.pem'
   },
   recover: {
-    private: '../../certs/private_recover.pem',
-    public: '../../certs/public_recover.pem'
+    private: '../../certs/rsa/private_recover.pem',
+    public: '../../certs/rsa/public_recover.pem'
   }
 }
 
