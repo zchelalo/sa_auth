@@ -90,7 +90,7 @@ export class AuthUseCase {
 
     const accessToken = await createJWT({ sub: userData.id }, TokenType.ACCESS)
     const refreshToken = await createJWT({ sub: userData.id }, TokenType.REFRESH)
-    const expiresAt = durationToMilliseconds(tokenExpiration[TokenType.ACCESS]) / 1000
+    const expiresAt = durationToMilliseconds(tokenExpiration[TokenType.REFRESH]) / 1000
 
     const tokenType = await this.authRepository.getTokenTypeIdByKey(TokenType.REFRESH)
     const newToken = new TokenValue(refreshToken, userData.id, tokenType.id)
@@ -131,7 +131,7 @@ export class AuthUseCase {
 
     const accessToken = await createJWT({ sub: userCreated.id }, TokenType.ACCESS)
     const refreshToken = await createJWT({ sub: userCreated.id }, TokenType.REFRESH)
-    const expiresAt = durationToMilliseconds(tokenExpiration[TokenType.ACCESS]) / 1000
+    const expiresAt = durationToMilliseconds(tokenExpiration[TokenType.REFRESH]) / 1000
 
     const tokenType = await this.authRepository.getTokenTypeIdByKey(TokenType.REFRESH)
     const newToken = new TokenValue(refreshToken, userCreated.id, tokenType.id)
