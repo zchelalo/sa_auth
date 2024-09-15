@@ -30,6 +30,11 @@ export class DTOAuthResponse {
   refreshToken: string
 
   /**
+   * The expiration time of the access token.
+  */
+  expiresAt: number
+
+  /**
    * The information of the user.
   */
   user: DTOUserResponse
@@ -39,9 +44,10 @@ export class DTOAuthResponse {
    * 
    * @param {AuthValue} user - The auth value object from the domain layer.
   */
-  constructor({ accessToken, refreshToken, user }: AuthValue) {
+  constructor({ accessToken, refreshToken, expiresAt, user }: AuthValue) {
     this.accessToken = accessToken
     this.refreshToken = refreshToken
+    this.expiresAt = expiresAt
     this.user = new DTOUserResponse(user)
   }
 }

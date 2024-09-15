@@ -32,6 +32,12 @@ export class AuthValue implements AuthEntity {
   readonly refreshToken: string
 
   /**
+   * The expiration time of the access token.
+   * @type {number}
+  */
+  readonly expiresAt: number
+
+  /**
    * The information of the user.
    * @type {UserEntity}
   */
@@ -44,9 +50,10 @@ export class AuthValue implements AuthEntity {
    * @param {string} refreshToken - The refresh token of the user.
    * @param {UserEntity} user - The information of the user.
   */
-  constructor(accessToken: string, refreshToken: string, user: UserEntity) {
+  constructor(accessToken: string, refreshToken: string, expiresAt: number, user: UserEntity) {
     this.accessToken = accessToken
     this.refreshToken = refreshToken
+    this.expiresAt = expiresAt
     this.user = user
   }
 }

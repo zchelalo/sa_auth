@@ -90,6 +90,7 @@ export class AuthUseCase {
 
     const accessToken = await createJWT({ sub: userData.id }, TokenType.ACCESS)
     const refreshToken = await createJWT({ sub: userData.id }, TokenType.REFRESH)
+    const expiresAt = durationToMilliseconds(tokenExpiration[TokenType.ACCESS]) / 1000
 
     const tokenType = await this.authRepository.getTokenTypeIdByKey(TokenType.REFRESH)
     const newToken = new TokenValue(refreshToken, userData.id, tokenType.id)
@@ -100,6 +101,7 @@ export class AuthUseCase {
     const authValue = new DTOAuthResponse({
       accessToken,
       refreshToken,
+      expiresAt,
       user: dtoUserResponse
     })
 
@@ -129,6 +131,7 @@ export class AuthUseCase {
 
     const accessToken = await createJWT({ sub: userCreated.id }, TokenType.ACCESS)
     const refreshToken = await createJWT({ sub: userCreated.id }, TokenType.REFRESH)
+    const expiresAt = durationToMilliseconds(tokenExpiration[TokenType.ACCESS]) / 1000
 
     const tokenType = await this.authRepository.getTokenTypeIdByKey(TokenType.REFRESH)
     const newToken = new TokenValue(refreshToken, userCreated.id, tokenType.id)
@@ -137,6 +140,7 @@ export class AuthUseCase {
     const authValue = new DTOAuthResponse({
       accessToken,
       refreshToken,
+      expiresAt,
       user: userCreated
     })
 
@@ -166,7 +170,7 @@ export class AuthUseCase {
     await this.authRepository.revokeTokenByTokenValue(refreshToken)
   }
 
-  public async isAuthorized(accessToken: string, refreshToken: string): Promise<{ isAuthorized: boolean, tokens?: { accessToken: string, refreshToken: string } }> {
+  public async isAuthorized(accessToken: string, refreshToken: string): Promise<{ isAuthorized: boolean, tokens?: { accessToken: string, refreshToken: string, expiresAt?: number } }> {
     try {
       tokenSchema.parse({ token: accessToken })
       tokenSchema.parse({ token: refreshToken })
@@ -194,7 +198,8 @@ export class AuthUseCase {
             isAuthorized: true,
             tokens: {
               accessToken: newTokens.accessToken,
-              refreshToken: newTokens.refreshToken ? newTokens.refreshToken : refreshToken
+              refreshToken: newTokens.refreshToken ? newTokens.refreshToken : refreshToken,
+              expiresAt: durationToMilliseconds(tokenExpiration[TokenType.REFRESH]) / 1000
             }
           }
         } catch (error) {

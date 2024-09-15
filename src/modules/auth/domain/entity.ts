@@ -22,6 +22,12 @@ export interface AuthEntity {
   refreshToken: string
 
   /**
+   * The expiration time of the access token.
+   * @type {number}
+  */
+  expiresAt: number
+
+  /**
    * The information of the user.
    * @type {UserEntity}
   */

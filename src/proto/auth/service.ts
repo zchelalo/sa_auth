@@ -31,12 +31,14 @@ export interface AuthUser {
 export interface Auth {
   accessToken: string;
   refreshToken: string;
+  expiresAt: number;
   user: AuthUser | undefined;
 }
 
 export interface Tokens {
   accessToken: string;
   refreshToken: string;
+  expiresAt?: number | undefined;
 }
 
 export interface IsAuth {
@@ -196,7 +198,7 @@ export const AuthUser: MessageFns<AuthUser> = {
 };
 
 function createBaseAuth(): Auth {
-  return { accessToken: "", refreshToken: "", user: undefined };
+  return { accessToken: "", refreshToken: "", expiresAt: 0, user: undefined };
 }
 
 export const Auth: MessageFns<Auth> = {
@@ -207,8 +209,11 @@ export const Auth: MessageFns<Auth> = {
     if (message.refreshToken !== "") {
       writer.uint32(18).string(message.refreshToken);
     }
+    if (message.expiresAt !== 0) {
+      writer.uint32(24).int64(message.expiresAt);
+    }
     if (message.user !== undefined) {
-      AuthUser.encode(message.user, writer.uint32(26).fork()).join();
+      AuthUser.encode(message.user, writer.uint32(34).fork()).join();
     }
     return writer;
   },
@@ -235,7 +240,14 @@ export const Auth: MessageFns<Auth> = {
           message.refreshToken = reader.string();
           continue;
         case 3:
-          if (tag !== 26) {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.expiresAt = longToNumber(reader.int64());
+          continue;
+        case 4:
+          if (tag !== 34) {
             break;
           }
 
@@ -254,6 +266,7 @@ export const Auth: MessageFns<Auth> = {
     return {
       accessToken: isSet(object.accessToken) ? globalThis.String(object.accessToken) : "",
       refreshToken: isSet(object.refreshToken) ? globalThis.String(object.refreshToken) : "",
+      expiresAt: isSet(object.expiresAt) ? globalThis.Number(object.expiresAt) : 0,
       user: isSet(object.user) ? AuthUser.fromJSON(object.user) : undefined,
     };
   },
@@ -265,6 +278,9 @@ export const Auth: MessageFns<Auth> = {
     }
     if (message.refreshToken !== "") {
       obj.refreshToken = message.refreshToken;
+    }
+    if (message.expiresAt !== 0) {
+      obj.expiresAt = Math.round(message.expiresAt);
     }
     if (message.user !== undefined) {
       obj.user = AuthUser.toJSON(message.user);
@@ -279,13 +295,14 @@ export const Auth: MessageFns<Auth> = {
     const message = createBaseAuth();
     message.accessToken = object.accessToken ?? "";
     message.refreshToken = object.refreshToken ?? "";
+    message.expiresAt = object.expiresAt ?? 0;
     message.user = (object.user !== undefined && object.user !== null) ? AuthUser.fromPartial(object.user) : undefined;
     return message;
   },
 };
 
 function createBaseTokens(): Tokens {
-  return { accessToken: "", refreshToken: "" };
+  return { accessToken: "", refreshToken: "", expiresAt: undefined };
 }
 
 export const Tokens: MessageFns<Tokens> = {
@@ -295,6 +312,9 @@ export const Tokens: MessageFns<Tokens> = {
     }
     if (message.refreshToken !== "") {
       writer.uint32(18).string(message.refreshToken);
+    }
+    if (message.expiresAt !== undefined) {
+      writer.uint32(24).int64(message.expiresAt);
     }
     return writer;
   },
@@ -320,6 +340,13 @@ export const Tokens: MessageFns<Tokens> = {
 
           message.refreshToken = reader.string();
           continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.expiresAt = longToNumber(reader.int64());
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -333,6 +360,7 @@ export const Tokens: MessageFns<Tokens> = {
     return {
       accessToken: isSet(object.accessToken) ? globalThis.String(object.accessToken) : "",
       refreshToken: isSet(object.refreshToken) ? globalThis.String(object.refreshToken) : "",
+      expiresAt: isSet(object.expiresAt) ? globalThis.Number(object.expiresAt) : undefined,
     };
   },
 
@@ -344,6 +372,9 @@ export const Tokens: MessageFns<Tokens> = {
     if (message.refreshToken !== "") {
       obj.refreshToken = message.refreshToken;
     }
+    if (message.expiresAt !== undefined) {
+      obj.expiresAt = Math.round(message.expiresAt);
+    }
     return obj;
   },
 
@@ -354,6 +385,7 @@ export const Tokens: MessageFns<Tokens> = {
     const message = createBaseTokens();
     message.accessToken = object.accessToken ?? "";
     message.refreshToken = object.refreshToken ?? "";
+    message.expiresAt = object.expiresAt ?? undefined;
     return message;
   },
 };
@@ -1233,6 +1265,17 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function longToNumber(int64: { toString(): string }): number {
+  const num = globalThis.Number(int64.toString());
+  if (num > globalThis.Number.MAX_SAFE_INTEGER) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  }
+  if (num < globalThis.Number.MIN_SAFE_INTEGER) {
+    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
+  }
+  return num;
+}
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;

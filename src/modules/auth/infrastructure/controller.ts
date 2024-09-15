@@ -32,6 +32,7 @@ export class AuthController {
       const auth: Auth = {
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,
+        expiresAt: result.expiresAt,
         user: {
           id: result.user.id,
           name: result.user.name,
@@ -77,6 +78,7 @@ export class AuthController {
       const auth: Auth = {
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,
+        expiresAt: result.expiresAt,
         user: {
           id: result.user.id,
           name: result.user.name,
