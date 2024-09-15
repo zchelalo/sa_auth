@@ -12,11 +12,12 @@ import { TokenType } from 'src/config/constants'
 import { createJWT, tokenExpiration, verifyJWT } from 'src/utils/jwt'
 import { durationToMilliseconds } from 'src/utils/time_converter'
 
-import { InternalServerError, UnauthorizedError } from 'src/helpers/errors/custom_error'
+import { InternalServerError, NotFoundError, UnauthorizedError } from 'src/helpers/errors/custom_error'
 
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { DTOUserResponse } from 'src/modules/user/application/dtos/user_response'
+import { ZodError } from 'zod'
 
 /**
  * Create a new Auth Use Case.
@@ -165,26 +166,63 @@ export class AuthUseCase {
     await this.authRepository.revokeTokenByTokenValue(refreshToken)
   }
 
-  public async isAuthorized(accessToken: string, refreshToken: string): Promise<boolean> {
-    tokenSchema.parse({ token: accessToken })
-    tokenSchema.parse({ token: refreshToken })
+  public async isAuthorized(accessToken: string, refreshToken: string): Promise<{ isAuthorized: boolean, tokens?: { accessToken: string, refreshToken: string } }> {
+    try {
+      tokenSchema.parse({ token: accessToken })
+      tokenSchema.parse({ token: refreshToken })
 
-    const accessPayload = await verifyJWT(accessToken, TokenType.ACCESS)
-    if (!accessPayload) {
-      return false
+      const accessPayload = await verifyJWT(accessToken, TokenType.ACCESS)
+      if (!accessPayload) {
+        return {
+          isAuthorized: false
+        }
+      }
+
+      return {
+        isAuthorized: true,
+        tokens: {
+          accessToken,
+          refreshToken
+        }
+      }
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        try {
+          const newTokens = await this.refreshAccessToken(refreshToken)
+
+          return {
+            isAuthorized: true,
+            tokens: {
+              accessToken: newTokens.accessToken,
+              refreshToken: newTokens.refreshToken || refreshToken
+            }
+          }
+        } catch (error) {
+          if (error instanceof jwt.TokenExpiredError) {
+            return {
+              isAuthorized: false
+            }
+          }
+
+          throw error
+        }
+      }
+
+      const errorsToReturn = [
+        jwt.JsonWebTokenError,
+        UnauthorizedError,
+        NotFoundError,
+        ZodError
+      ]
+
+      if (errorsToReturn.some(e => error instanceof e)) {
+        return {
+          isAuthorized: false
+        }
+      }
+
+      throw error
     }
-
-    const refreshPayload = await verifyJWT(refreshToken, TokenType.REFRESH)
-    if (!refreshPayload) {
-      return false
-    }
-
-    const refreshTokenExist = this.tokenExistAtDB(refreshToken)
-    if (!refreshTokenExist) {
-      return false
-    }
-
-    return true
   }
 
   /**
@@ -243,7 +281,6 @@ export class AuthUseCase {
    */
   public async tokenExistAtDB(token: string): Promise<boolean> {
     const tokenObtained = await this.authRepository.getTokenByTokenValue(token)
-
     return tokenObtained ? true : false
   }
 

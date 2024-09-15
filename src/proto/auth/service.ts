@@ -34,6 +34,16 @@ export interface Auth {
   user: User | undefined;
 }
 
+export interface Tokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface IsAuth {
+  isAuthorized: boolean;
+  tokens?: Tokens | undefined;
+}
+
 export interface Error {
   /** Código de error, como los códigos de estado HTTP */
   code: number;
@@ -77,7 +87,7 @@ export interface IsAuthorizedRequest {
 }
 
 export interface IsAuthorizedResponse {
-  isAuthorized?: boolean | undefined;
+  data?: IsAuth | undefined;
   error?: Error | undefined;
 }
 
@@ -270,6 +280,156 @@ export const Auth: MessageFns<Auth> = {
     message.accessToken = object.accessToken ?? "";
     message.refreshToken = object.refreshToken ?? "";
     message.user = (object.user !== undefined && object.user !== null) ? User.fromPartial(object.user) : undefined;
+    return message;
+  },
+};
+
+function createBaseTokens(): Tokens {
+  return { accessToken: "", refreshToken: "" };
+}
+
+export const Tokens: MessageFns<Tokens> = {
+  encode(message: Tokens, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.accessToken !== "") {
+      writer.uint32(10).string(message.accessToken);
+    }
+    if (message.refreshToken !== "") {
+      writer.uint32(18).string(message.refreshToken);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Tokens {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTokens();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.accessToken = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.refreshToken = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Tokens {
+    return {
+      accessToken: isSet(object.accessToken) ? globalThis.String(object.accessToken) : "",
+      refreshToken: isSet(object.refreshToken) ? globalThis.String(object.refreshToken) : "",
+    };
+  },
+
+  toJSON(message: Tokens): unknown {
+    const obj: any = {};
+    if (message.accessToken !== "") {
+      obj.accessToken = message.accessToken;
+    }
+    if (message.refreshToken !== "") {
+      obj.refreshToken = message.refreshToken;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Tokens>, I>>(base?: I): Tokens {
+    return Tokens.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Tokens>, I>>(object: I): Tokens {
+    const message = createBaseTokens();
+    message.accessToken = object.accessToken ?? "";
+    message.refreshToken = object.refreshToken ?? "";
+    return message;
+  },
+};
+
+function createBaseIsAuth(): IsAuth {
+  return { isAuthorized: false, tokens: undefined };
+}
+
+export const IsAuth: MessageFns<IsAuth> = {
+  encode(message: IsAuth, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.isAuthorized !== false) {
+      writer.uint32(8).bool(message.isAuthorized);
+    }
+    if (message.tokens !== undefined) {
+      Tokens.encode(message.tokens, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): IsAuth {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseIsAuth();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.isAuthorized = reader.bool();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.tokens = Tokens.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): IsAuth {
+    return {
+      isAuthorized: isSet(object.isAuthorized) ? globalThis.Boolean(object.isAuthorized) : false,
+      tokens: isSet(object.tokens) ? Tokens.fromJSON(object.tokens) : undefined,
+    };
+  },
+
+  toJSON(message: IsAuth): unknown {
+    const obj: any = {};
+    if (message.isAuthorized !== false) {
+      obj.isAuthorized = message.isAuthorized;
+    }
+    if (message.tokens !== undefined) {
+      obj.tokens = Tokens.toJSON(message.tokens);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<IsAuth>, I>>(base?: I): IsAuth {
+    return IsAuth.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<IsAuth>, I>>(object: I): IsAuth {
+    const message = createBaseIsAuth();
+    message.isAuthorized = object.isAuthorized ?? false;
+    message.tokens = (object.tokens !== undefined && object.tokens !== null)
+      ? Tokens.fromPartial(object.tokens)
+      : undefined;
     return message;
   },
 };
@@ -865,13 +1025,13 @@ export const IsAuthorizedRequest: MessageFns<IsAuthorizedRequest> = {
 };
 
 function createBaseIsAuthorizedResponse(): IsAuthorizedResponse {
-  return { isAuthorized: undefined, error: undefined };
+  return { data: undefined, error: undefined };
 }
 
 export const IsAuthorizedResponse: MessageFns<IsAuthorizedResponse> = {
   encode(message: IsAuthorizedResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.isAuthorized !== undefined) {
-      writer.uint32(8).bool(message.isAuthorized);
+    if (message.data !== undefined) {
+      IsAuth.encode(message.data, writer.uint32(10).fork()).join();
     }
     if (message.error !== undefined) {
       Error.encode(message.error, writer.uint32(18).fork()).join();
@@ -887,11 +1047,11 @@ export const IsAuthorizedResponse: MessageFns<IsAuthorizedResponse> = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          if (tag !== 8) {
+          if (tag !== 10) {
             break;
           }
 
-          message.isAuthorized = reader.bool();
+          message.data = IsAuth.decode(reader, reader.uint32());
           continue;
         case 2:
           if (tag !== 18) {
@@ -911,15 +1071,15 @@ export const IsAuthorizedResponse: MessageFns<IsAuthorizedResponse> = {
 
   fromJSON(object: any): IsAuthorizedResponse {
     return {
-      isAuthorized: isSet(object.isAuthorized) ? globalThis.Boolean(object.isAuthorized) : undefined,
+      data: isSet(object.data) ? IsAuth.fromJSON(object.data) : undefined,
       error: isSet(object.error) ? Error.fromJSON(object.error) : undefined,
     };
   },
 
   toJSON(message: IsAuthorizedResponse): unknown {
     const obj: any = {};
-    if (message.isAuthorized !== undefined) {
-      obj.isAuthorized = message.isAuthorized;
+    if (message.data !== undefined) {
+      obj.data = IsAuth.toJSON(message.data);
     }
     if (message.error !== undefined) {
       obj.error = Error.toJSON(message.error);
@@ -932,7 +1092,7 @@ export const IsAuthorizedResponse: MessageFns<IsAuthorizedResponse> = {
   },
   fromPartial<I extends Exact<DeepPartial<IsAuthorizedResponse>, I>>(object: I): IsAuthorizedResponse {
     const message = createBaseIsAuthorizedResponse();
-    message.isAuthorized = object.isAuthorized ?? undefined;
+    message.data = (object.data !== undefined && object.data !== null) ? IsAuth.fromPartial(object.data) : undefined;
     message.error = (object.error !== undefined && object.error !== null) ? Error.fromPartial(object.error) : undefined;
     return message;
   },

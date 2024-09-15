@@ -144,13 +144,13 @@ export class AuthController {
       tokenSchema.parse({ token: accessToken })
       tokenSchema.parse({ token: refreshToken })
 
-      const isAuth = await this.useCase.isAuthorized(accessToken, refreshToken)
+      const data = await this.useCase.isAuthorized(accessToken, refreshToken)
 
-      const signOutResponse: IsAuthorizedResponse = {
-        isAuthorized: isAuth
+      const isAuthorizedResponse: IsAuthorizedResponse = {
+        data
       }
 
-      callback(null, signOutResponse)
+      callback(null, isAuthorizedResponse)
     } catch (error) {
       let errorResponse
       if (error instanceof Error) {
