@@ -23,5 +23,6 @@ const authController = new AuthController(useCase)
 export const authService: AuthServiceServer = {
   signIn: applyMiddleware(authController.signIn, logRequestMiddleware()),
   signUp: applyMiddleware(authController.signUp, logRequestMiddleware()),
-  signOut: applyMiddleware(authController.signOut, logRequestMiddleware())
+  signOut: applyMiddleware(authController.signOut, logRequestMiddleware()),
+  isAuthorized: applyMiddleware(authController.isAuthorized, logRequestMiddleware())
 }

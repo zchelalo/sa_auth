@@ -1,7 +1,17 @@
 import { AuthUseCase } from 'src/modules/auth/application/use_cases/auth'
 
 import * as grpc from '@grpc/grpc-js'
-import { Auth, SignInRequest, SignInResponse, SignOutRequest, SignOutResponse, SignUpRequest, SignUpResponse } from 'src/proto/auth/service'
+import {
+  Auth,
+  SignInRequest,
+  SignInResponse,
+  SignOutRequest,
+  SignOutResponse,
+  SignUpRequest,
+  SignUpResponse,
+  IsAuthorizedRequest,
+  IsAuthorizedResponse
+} from 'src/proto/auth/service'
 import { handlerErrors } from 'src/helpers/errors/handler'
 import { signInSchema, signUpSchema, tokenSchema } from 'src/modules/auth/application/schemas/auth'
 
@@ -122,6 +132,37 @@ export class AuthController {
       }
 
       const response: SignOutResponse = {
+        error: errorResponse
+      }
+      callback(null, response)
+    }
+  }
+
+  public isAuthorized = async (call: grpc.ServerUnaryCall<IsAuthorizedRequest, any>, callback: grpc.sendUnaryData<IsAuthorizedResponse>): Promise<void> => {
+    try {
+      const { accessToken, refreshToken } = call.request
+      tokenSchema.parse({ token: accessToken })
+      tokenSchema.parse({ token: refreshToken })
+
+      const isAuth = await this.useCase.isAuthorized(accessToken, refreshToken)
+
+      const signOutResponse: IsAuthorizedResponse = {
+        isAuthorized: isAuth
+      }
+
+      callback(null, signOutResponse)
+    } catch (error) {
+      let errorResponse
+      if (error instanceof Error) {
+        errorResponse = handlerErrors(error)
+      } else {
+        errorResponse = {
+          code: grpc.status.UNKNOWN,
+          message: 'Unknown error'
+        }
+      }
+
+      const response: IsAuthorizedResponse = {
         error: errorResponse
       }
       callback(null, response)

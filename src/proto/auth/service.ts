@@ -71,6 +71,16 @@ export interface SignOutResponse {
   error?: Error | undefined;
 }
 
+export interface IsAuthorizedRequest {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface IsAuthorizedResponse {
+  isAuthorized?: boolean | undefined;
+  error?: Error | undefined;
+}
+
 function createBaseUser(): User {
   return { id: "", name: "", email: "", verified: false };
 }
@@ -780,6 +790,154 @@ export const SignOutResponse: MessageFns<SignOutResponse> = {
   },
 };
 
+function createBaseIsAuthorizedRequest(): IsAuthorizedRequest {
+  return { accessToken: "", refreshToken: "" };
+}
+
+export const IsAuthorizedRequest: MessageFns<IsAuthorizedRequest> = {
+  encode(message: IsAuthorizedRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.accessToken !== "") {
+      writer.uint32(10).string(message.accessToken);
+    }
+    if (message.refreshToken !== "") {
+      writer.uint32(18).string(message.refreshToken);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): IsAuthorizedRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseIsAuthorizedRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.accessToken = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.refreshToken = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): IsAuthorizedRequest {
+    return {
+      accessToken: isSet(object.accessToken) ? globalThis.String(object.accessToken) : "",
+      refreshToken: isSet(object.refreshToken) ? globalThis.String(object.refreshToken) : "",
+    };
+  },
+
+  toJSON(message: IsAuthorizedRequest): unknown {
+    const obj: any = {};
+    if (message.accessToken !== "") {
+      obj.accessToken = message.accessToken;
+    }
+    if (message.refreshToken !== "") {
+      obj.refreshToken = message.refreshToken;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<IsAuthorizedRequest>, I>>(base?: I): IsAuthorizedRequest {
+    return IsAuthorizedRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<IsAuthorizedRequest>, I>>(object: I): IsAuthorizedRequest {
+    const message = createBaseIsAuthorizedRequest();
+    message.accessToken = object.accessToken ?? "";
+    message.refreshToken = object.refreshToken ?? "";
+    return message;
+  },
+};
+
+function createBaseIsAuthorizedResponse(): IsAuthorizedResponse {
+  return { isAuthorized: undefined, error: undefined };
+}
+
+export const IsAuthorizedResponse: MessageFns<IsAuthorizedResponse> = {
+  encode(message: IsAuthorizedResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.isAuthorized !== undefined) {
+      writer.uint32(8).bool(message.isAuthorized);
+    }
+    if (message.error !== undefined) {
+      Error.encode(message.error, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): IsAuthorizedResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseIsAuthorizedResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.isAuthorized = reader.bool();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.error = Error.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): IsAuthorizedResponse {
+    return {
+      isAuthorized: isSet(object.isAuthorized) ? globalThis.Boolean(object.isAuthorized) : undefined,
+      error: isSet(object.error) ? Error.fromJSON(object.error) : undefined,
+    };
+  },
+
+  toJSON(message: IsAuthorizedResponse): unknown {
+    const obj: any = {};
+    if (message.isAuthorized !== undefined) {
+      obj.isAuthorized = message.isAuthorized;
+    }
+    if (message.error !== undefined) {
+      obj.error = Error.toJSON(message.error);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<IsAuthorizedResponse>, I>>(base?: I): IsAuthorizedResponse {
+    return IsAuthorizedResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<IsAuthorizedResponse>, I>>(object: I): IsAuthorizedResponse {
+    const message = createBaseIsAuthorizedResponse();
+    message.isAuthorized = object.isAuthorized ?? undefined;
+    message.error = (object.error !== undefined && object.error !== null) ? Error.fromPartial(object.error) : undefined;
+    return message;
+  },
+};
+
 export type AuthServiceService = typeof AuthServiceService;
 export const AuthServiceService = {
   signIn: {
@@ -809,12 +967,22 @@ export const AuthServiceService = {
     responseSerialize: (value: SignOutResponse) => Buffer.from(SignOutResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => SignOutResponse.decode(value),
   },
+  isAuthorized: {
+    path: "/AuthService/isAuthorized",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: IsAuthorizedRequest) => Buffer.from(IsAuthorizedRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => IsAuthorizedRequest.decode(value),
+    responseSerialize: (value: IsAuthorizedResponse) => Buffer.from(IsAuthorizedResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => IsAuthorizedResponse.decode(value),
+  },
 } as const;
 
 export interface AuthServiceServer extends UntypedServiceImplementation {
   signIn: handleUnaryCall<SignInRequest, SignInResponse>;
   signUp: handleUnaryCall<SignUpRequest, SignUpResponse>;
   signOut: handleUnaryCall<SignOutRequest, SignOutResponse>;
+  isAuthorized: handleUnaryCall<IsAuthorizedRequest, IsAuthorizedResponse>;
 }
 
 export interface AuthServiceClient extends Client {
@@ -862,6 +1030,21 @@ export interface AuthServiceClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: SignOutResponse) => void,
+  ): ClientUnaryCall;
+  isAuthorized(
+    request: IsAuthorizedRequest,
+    callback: (error: ServiceError | null, response: IsAuthorizedResponse) => void,
+  ): ClientUnaryCall;
+  isAuthorized(
+    request: IsAuthorizedRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: IsAuthorizedResponse) => void,
+  ): ClientUnaryCall;
+  isAuthorized(
+    request: IsAuthorizedRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: IsAuthorizedResponse) => void,
   ): ClientUnaryCall;
 }
 

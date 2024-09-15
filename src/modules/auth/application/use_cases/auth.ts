@@ -165,6 +165,28 @@ export class AuthUseCase {
     await this.authRepository.revokeTokenByTokenValue(refreshToken)
   }
 
+  public async isAuthorized(accessToken: string, refreshToken: string): Promise<boolean> {
+    tokenSchema.parse({ token: accessToken })
+    tokenSchema.parse({ token: refreshToken })
+
+    const accessPayload = await verifyJWT(accessToken, TokenType.ACCESS)
+    if (!accessPayload) {
+      return false
+    }
+
+    const refreshPayload = await verifyJWT(refreshToken, TokenType.REFRESH)
+    if (!refreshPayload) {
+      return false
+    }
+
+    const refreshTokenExist = this.tokenExistAtDB(refreshToken)
+    if (!refreshTokenExist) {
+      return false
+    }
+
+    return true
+  }
+
   /**
    * @function refreshAccessToken
    * @description Refresh the access token of a user.
@@ -208,7 +230,7 @@ export class AuthUseCase {
   }
 
   /**
-   * @function tokenExist
+   * @function tokenExistAtDB
    * @description Check if a token exists.
    * @param token - The token to check.
    * @param type - The type of the token.
@@ -216,15 +238,10 @@ export class AuthUseCase {
    * @example
    * ```ts
    * const token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3ZDgwNzQwNi1hNTQzLTRlMWYtYjAxOS1jOGIwNWQ1OGM1OWIiLCJpYXQiOjE3MjQ2MzExMjksImV4cCI6MTcyNTkyNzEyOX0.l7WXdoTopPRqeK-TNIgJtCoR863Yot5cJC-jV3v6DwJtrvH9wjqGFPHpgo00z4d9jCbMTEBnUfv2NkFCk4ecPt4YTledruAuxQoULk3NqoaXhn4wlKhQj7w14ngldir_pud4SxXJnfaw_zd1xg6Gd7rDH-LAWUYaNyvs8qt2CRra7pnBA6tBUvrO58HYReJRQU-GQP9PWRmRC4G8H3tpnGEybn4NcNCn-rO-PIgABZ1I3Len1y8ibKMrz53Rc1PTUTInD96RORM5zp5c06qkyUjW9AThFQwmYP9Yzo4z3fBsuvqQFha31lWoqzP5LNk2iOHECuequuLPThtNWdsRyw'
-   * const tokenExist = await authUseCase.refreshTokenExist(refreshToken, TokenType.REFRESH)
+   * const existToken = await authUseCase.tokenExistAtDB(token)
    * ```
    */
-  public async tokenExist(token: string, type: TokenType): Promise<boolean> {
-    const payload = await verifyJWT(token, type)
-    if (!payload) {
-      return false
-    }
-
+  public async tokenExistAtDB(token: string): Promise<boolean> {
     const tokenObtained = await this.authRepository.getTokenByTokenValue(token)
 
     return tokenObtained ? true : false
