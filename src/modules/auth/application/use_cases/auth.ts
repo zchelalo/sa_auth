@@ -194,11 +194,18 @@ export class AuthUseCase {
             isAuthorized: true,
             tokens: {
               accessToken: newTokens.accessToken,
-              refreshToken: newTokens.refreshToken || refreshToken
+              refreshToken: newTokens.refreshToken ? newTokens.refreshToken : refreshToken
             }
           }
         } catch (error) {
-          if (error instanceof jwt.TokenExpiredError) {
+          const errorsToReturn = [
+            jwt.TokenExpiredError,
+            jwt.JsonWebTokenError,
+            NotFoundError,
+            UnauthorizedError
+          ]
+
+          if (errorsToReturn.some(e => error instanceof e)) {
             return {
               isAuthorized: false
             }
@@ -210,8 +217,6 @@ export class AuthUseCase {
 
       const errorsToReturn = [
         jwt.JsonWebTokenError,
-        UnauthorizedError,
-        NotFoundError,
         ZodError
       ]
 
@@ -308,7 +313,7 @@ export class AuthUseCase {
 
     const expirationTime = payload.exp
 
-    const totalDuration = durationToMilliseconds(tokenExpiration[TokenType.REFRESH])
+    const totalDuration = durationToMilliseconds(tokenExpiration[TokenType.REFRESH]) / 1000
     const threshold = totalDuration * 0.25
 
     return (expirationTime - currentTime) < threshold
