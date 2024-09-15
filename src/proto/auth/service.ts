@@ -44,7 +44,7 @@ export interface IsAuth {
   tokens?: Tokens | undefined;
 }
 
-export interface Error {
+export interface AuthError {
   /** Código de error, como los códigos de estado HTTP */
   code: number;
   /** Mensaje de error descriptivo */
@@ -58,7 +58,7 @@ export interface SignInRequest {
 
 export interface SignInResponse {
   auth?: Auth | undefined;
-  error?: Error | undefined;
+  error?: AuthError | undefined;
 }
 
 export interface SignUpRequest {
@@ -69,7 +69,7 @@ export interface SignUpRequest {
 
 export interface SignUpResponse {
   auth?: Auth | undefined;
-  error?: Error | undefined;
+  error?: AuthError | undefined;
 }
 
 export interface SignOutRequest {
@@ -78,7 +78,7 @@ export interface SignOutRequest {
 
 export interface SignOutResponse {
   success?: boolean | undefined;
-  error?: Error | undefined;
+  error?: AuthError | undefined;
 }
 
 export interface IsAuthorizedRequest {
@@ -88,7 +88,7 @@ export interface IsAuthorizedRequest {
 
 export interface IsAuthorizedResponse {
   data?: IsAuth | undefined;
-  error?: Error | undefined;
+  error?: AuthError | undefined;
 }
 
 function createBaseUser(): User {
@@ -434,12 +434,12 @@ export const IsAuth: MessageFns<IsAuth> = {
   },
 };
 
-function createBaseError(): Error {
+function createBaseAuthError(): AuthError {
   return { code: 0, message: "" };
 }
 
-export const Error: MessageFns<Error> = {
-  encode(message: Error, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const AuthError: MessageFns<AuthError> = {
+  encode(message: AuthError, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.code !== 0) {
       writer.uint32(8).int32(message.code);
     }
@@ -449,10 +449,10 @@ export const Error: MessageFns<Error> = {
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): Error {
+  decode(input: BinaryReader | Uint8Array, length?: number): AuthError {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseError();
+    const message = createBaseAuthError();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -479,14 +479,14 @@ export const Error: MessageFns<Error> = {
     return message;
   },
 
-  fromJSON(object: any): Error {
+  fromJSON(object: any): AuthError {
     return {
       code: isSet(object.code) ? globalThis.Number(object.code) : 0,
       message: isSet(object.message) ? globalThis.String(object.message) : "",
     };
   },
 
-  toJSON(message: Error): unknown {
+  toJSON(message: AuthError): unknown {
     const obj: any = {};
     if (message.code !== 0) {
       obj.code = Math.round(message.code);
@@ -497,11 +497,11 @@ export const Error: MessageFns<Error> = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<Error>, I>>(base?: I): Error {
-    return Error.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<AuthError>, I>>(base?: I): AuthError {
+    return AuthError.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<Error>, I>>(object: I): Error {
-    const message = createBaseError();
+  fromPartial<I extends Exact<DeepPartial<AuthError>, I>>(object: I): AuthError {
+    const message = createBaseAuthError();
     message.code = object.code ?? 0;
     message.message = object.message ?? "";
     return message;
@@ -592,7 +592,7 @@ export const SignInResponse: MessageFns<SignInResponse> = {
       Auth.encode(message.auth, writer.uint32(10).fork()).join();
     }
     if (message.error !== undefined) {
-      Error.encode(message.error, writer.uint32(18).fork()).join();
+      AuthError.encode(message.error, writer.uint32(18).fork()).join();
     }
     return writer;
   },
@@ -616,7 +616,7 @@ export const SignInResponse: MessageFns<SignInResponse> = {
             break;
           }
 
-          message.error = Error.decode(reader, reader.uint32());
+          message.error = AuthError.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -630,7 +630,7 @@ export const SignInResponse: MessageFns<SignInResponse> = {
   fromJSON(object: any): SignInResponse {
     return {
       auth: isSet(object.auth) ? Auth.fromJSON(object.auth) : undefined,
-      error: isSet(object.error) ? Error.fromJSON(object.error) : undefined,
+      error: isSet(object.error) ? AuthError.fromJSON(object.error) : undefined,
     };
   },
 
@@ -640,7 +640,7 @@ export const SignInResponse: MessageFns<SignInResponse> = {
       obj.auth = Auth.toJSON(message.auth);
     }
     if (message.error !== undefined) {
-      obj.error = Error.toJSON(message.error);
+      obj.error = AuthError.toJSON(message.error);
     }
     return obj;
   },
@@ -651,7 +651,9 @@ export const SignInResponse: MessageFns<SignInResponse> = {
   fromPartial<I extends Exact<DeepPartial<SignInResponse>, I>>(object: I): SignInResponse {
     const message = createBaseSignInResponse();
     message.auth = (object.auth !== undefined && object.auth !== null) ? Auth.fromPartial(object.auth) : undefined;
-    message.error = (object.error !== undefined && object.error !== null) ? Error.fromPartial(object.error) : undefined;
+    message.error = (object.error !== undefined && object.error !== null)
+      ? AuthError.fromPartial(object.error)
+      : undefined;
     return message;
   },
 };
@@ -755,7 +757,7 @@ export const SignUpResponse: MessageFns<SignUpResponse> = {
       Auth.encode(message.auth, writer.uint32(10).fork()).join();
     }
     if (message.error !== undefined) {
-      Error.encode(message.error, writer.uint32(18).fork()).join();
+      AuthError.encode(message.error, writer.uint32(18).fork()).join();
     }
     return writer;
   },
@@ -779,7 +781,7 @@ export const SignUpResponse: MessageFns<SignUpResponse> = {
             break;
           }
 
-          message.error = Error.decode(reader, reader.uint32());
+          message.error = AuthError.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -793,7 +795,7 @@ export const SignUpResponse: MessageFns<SignUpResponse> = {
   fromJSON(object: any): SignUpResponse {
     return {
       auth: isSet(object.auth) ? Auth.fromJSON(object.auth) : undefined,
-      error: isSet(object.error) ? Error.fromJSON(object.error) : undefined,
+      error: isSet(object.error) ? AuthError.fromJSON(object.error) : undefined,
     };
   },
 
@@ -803,7 +805,7 @@ export const SignUpResponse: MessageFns<SignUpResponse> = {
       obj.auth = Auth.toJSON(message.auth);
     }
     if (message.error !== undefined) {
-      obj.error = Error.toJSON(message.error);
+      obj.error = AuthError.toJSON(message.error);
     }
     return obj;
   },
@@ -814,7 +816,9 @@ export const SignUpResponse: MessageFns<SignUpResponse> = {
   fromPartial<I extends Exact<DeepPartial<SignUpResponse>, I>>(object: I): SignUpResponse {
     const message = createBaseSignUpResponse();
     message.auth = (object.auth !== undefined && object.auth !== null) ? Auth.fromPartial(object.auth) : undefined;
-    message.error = (object.error !== undefined && object.error !== null) ? Error.fromPartial(object.error) : undefined;
+    message.error = (object.error !== undefined && object.error !== null)
+      ? AuthError.fromPartial(object.error)
+      : undefined;
     return message;
   },
 };
@@ -886,7 +890,7 @@ export const SignOutResponse: MessageFns<SignOutResponse> = {
       writer.uint32(8).bool(message.success);
     }
     if (message.error !== undefined) {
-      Error.encode(message.error, writer.uint32(18).fork()).join();
+      AuthError.encode(message.error, writer.uint32(18).fork()).join();
     }
     return writer;
   },
@@ -910,7 +914,7 @@ export const SignOutResponse: MessageFns<SignOutResponse> = {
             break;
           }
 
-          message.error = Error.decode(reader, reader.uint32());
+          message.error = AuthError.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -924,7 +928,7 @@ export const SignOutResponse: MessageFns<SignOutResponse> = {
   fromJSON(object: any): SignOutResponse {
     return {
       success: isSet(object.success) ? globalThis.Boolean(object.success) : undefined,
-      error: isSet(object.error) ? Error.fromJSON(object.error) : undefined,
+      error: isSet(object.error) ? AuthError.fromJSON(object.error) : undefined,
     };
   },
 
@@ -934,7 +938,7 @@ export const SignOutResponse: MessageFns<SignOutResponse> = {
       obj.success = message.success;
     }
     if (message.error !== undefined) {
-      obj.error = Error.toJSON(message.error);
+      obj.error = AuthError.toJSON(message.error);
     }
     return obj;
   },
@@ -945,7 +949,9 @@ export const SignOutResponse: MessageFns<SignOutResponse> = {
   fromPartial<I extends Exact<DeepPartial<SignOutResponse>, I>>(object: I): SignOutResponse {
     const message = createBaseSignOutResponse();
     message.success = object.success ?? undefined;
-    message.error = (object.error !== undefined && object.error !== null) ? Error.fromPartial(object.error) : undefined;
+    message.error = (object.error !== undefined && object.error !== null)
+      ? AuthError.fromPartial(object.error)
+      : undefined;
     return message;
   },
 };
@@ -1034,7 +1040,7 @@ export const IsAuthorizedResponse: MessageFns<IsAuthorizedResponse> = {
       IsAuth.encode(message.data, writer.uint32(10).fork()).join();
     }
     if (message.error !== undefined) {
-      Error.encode(message.error, writer.uint32(18).fork()).join();
+      AuthError.encode(message.error, writer.uint32(18).fork()).join();
     }
     return writer;
   },
@@ -1058,7 +1064,7 @@ export const IsAuthorizedResponse: MessageFns<IsAuthorizedResponse> = {
             break;
           }
 
-          message.error = Error.decode(reader, reader.uint32());
+          message.error = AuthError.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1072,7 +1078,7 @@ export const IsAuthorizedResponse: MessageFns<IsAuthorizedResponse> = {
   fromJSON(object: any): IsAuthorizedResponse {
     return {
       data: isSet(object.data) ? IsAuth.fromJSON(object.data) : undefined,
-      error: isSet(object.error) ? Error.fromJSON(object.error) : undefined,
+      error: isSet(object.error) ? AuthError.fromJSON(object.error) : undefined,
     };
   },
 
@@ -1082,7 +1088,7 @@ export const IsAuthorizedResponse: MessageFns<IsAuthorizedResponse> = {
       obj.data = IsAuth.toJSON(message.data);
     }
     if (message.error !== undefined) {
-      obj.error = Error.toJSON(message.error);
+      obj.error = AuthError.toJSON(message.error);
     }
     return obj;
   },
@@ -1093,7 +1099,9 @@ export const IsAuthorizedResponse: MessageFns<IsAuthorizedResponse> = {
   fromPartial<I extends Exact<DeepPartial<IsAuthorizedResponse>, I>>(object: I): IsAuthorizedResponse {
     const message = createBaseIsAuthorizedResponse();
     message.data = (object.data !== undefined && object.data !== null) ? IsAuth.fromPartial(object.data) : undefined;
-    message.error = (object.error !== undefined && object.error !== null) ? Error.fromPartial(object.error) : undefined;
+    message.error = (object.error !== undefined && object.error !== null)
+      ? AuthError.fromPartial(object.error)
+      : undefined;
     return message;
   },
 };
