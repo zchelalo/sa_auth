@@ -21,7 +21,7 @@ import {
 
 export const protobufPackage = "";
 
-export interface User {
+export interface AuthUser {
   id: string;
   name: string;
   email: string;
@@ -31,7 +31,7 @@ export interface User {
 export interface Auth {
   accessToken: string;
   refreshToken: string;
-  user: User | undefined;
+  user: AuthUser | undefined;
 }
 
 export interface Tokens {
@@ -91,12 +91,12 @@ export interface IsAuthorizedResponse {
   error?: AuthError | undefined;
 }
 
-function createBaseUser(): User {
+function createBaseAuthUser(): AuthUser {
   return { id: "", name: "", email: "", verified: false };
 }
 
-export const User: MessageFns<User> = {
-  encode(message: User, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const AuthUser: MessageFns<AuthUser> = {
+  encode(message: AuthUser, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
@@ -112,10 +112,10 @@ export const User: MessageFns<User> = {
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): User {
+  decode(input: BinaryReader | Uint8Array, length?: number): AuthUser {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseUser();
+    const message = createBaseAuthUser();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -156,7 +156,7 @@ export const User: MessageFns<User> = {
     return message;
   },
 
-  fromJSON(object: any): User {
+  fromJSON(object: any): AuthUser {
     return {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
       name: isSet(object.name) ? globalThis.String(object.name) : "",
@@ -165,7 +165,7 @@ export const User: MessageFns<User> = {
     };
   },
 
-  toJSON(message: User): unknown {
+  toJSON(message: AuthUser): unknown {
     const obj: any = {};
     if (message.id !== "") {
       obj.id = message.id;
@@ -182,11 +182,11 @@ export const User: MessageFns<User> = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<User>, I>>(base?: I): User {
-    return User.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<AuthUser>, I>>(base?: I): AuthUser {
+    return AuthUser.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<User>, I>>(object: I): User {
-    const message = createBaseUser();
+  fromPartial<I extends Exact<DeepPartial<AuthUser>, I>>(object: I): AuthUser {
+    const message = createBaseAuthUser();
     message.id = object.id ?? "";
     message.name = object.name ?? "";
     message.email = object.email ?? "";
@@ -208,7 +208,7 @@ export const Auth: MessageFns<Auth> = {
       writer.uint32(18).string(message.refreshToken);
     }
     if (message.user !== undefined) {
-      User.encode(message.user, writer.uint32(26).fork()).join();
+      AuthUser.encode(message.user, writer.uint32(26).fork()).join();
     }
     return writer;
   },
@@ -239,7 +239,7 @@ export const Auth: MessageFns<Auth> = {
             break;
           }
 
-          message.user = User.decode(reader, reader.uint32());
+          message.user = AuthUser.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -254,7 +254,7 @@ export const Auth: MessageFns<Auth> = {
     return {
       accessToken: isSet(object.accessToken) ? globalThis.String(object.accessToken) : "",
       refreshToken: isSet(object.refreshToken) ? globalThis.String(object.refreshToken) : "",
-      user: isSet(object.user) ? User.fromJSON(object.user) : undefined,
+      user: isSet(object.user) ? AuthUser.fromJSON(object.user) : undefined,
     };
   },
 
@@ -267,7 +267,7 @@ export const Auth: MessageFns<Auth> = {
       obj.refreshToken = message.refreshToken;
     }
     if (message.user !== undefined) {
-      obj.user = User.toJSON(message.user);
+      obj.user = AuthUser.toJSON(message.user);
     }
     return obj;
   },
@@ -279,7 +279,7 @@ export const Auth: MessageFns<Auth> = {
     const message = createBaseAuth();
     message.accessToken = object.accessToken ?? "";
     message.refreshToken = object.refreshToken ?? "";
-    message.user = (object.user !== undefined && object.user !== null) ? User.fromPartial(object.user) : undefined;
+    message.user = (object.user !== undefined && object.user !== null) ? AuthUser.fromPartial(object.user) : undefined;
     return message;
   },
 };

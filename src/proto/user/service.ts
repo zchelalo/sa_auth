@@ -21,7 +21,7 @@ import {
 
 export const protobufPackage = "";
 
-export interface User {
+export interface UserData {
   id: string;
   name: string;
   email: string;
@@ -44,7 +44,7 @@ export interface Meta {
 }
 
 export interface UsersWithMeta {
-  users: User[];
+  users: UserData[];
   meta: Meta | undefined;
 }
 
@@ -60,7 +60,7 @@ export interface GetUserRequest {
 }
 
 export interface GetUserResponse {
-  user?: User | undefined;
+  user?: UserData | undefined;
   error?: UserError | undefined;
 }
 
@@ -90,7 +90,7 @@ export interface CreateUserRequest {
 }
 
 export interface CreateUserResponse {
-  user?: User | undefined;
+  user?: UserData | undefined;
   error?: UserError | undefined;
 }
 
@@ -103,7 +103,7 @@ export interface UpdateUserRequest {
 }
 
 export interface UpdateUserResponse {
-  user?: User | undefined;
+  user?: UserData | undefined;
   error?: UserError | undefined;
 }
 
@@ -116,12 +116,12 @@ export interface DeleteUserResponse {
   error?: UserError | undefined;
 }
 
-function createBaseUser(): User {
+function createBaseUserData(): UserData {
   return { id: "", name: "", email: "", verified: false };
 }
 
-export const User: MessageFns<User> = {
-  encode(message: User, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const UserData: MessageFns<UserData> = {
+  encode(message: UserData, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
@@ -137,10 +137,10 @@ export const User: MessageFns<User> = {
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): User {
+  decode(input: BinaryReader | Uint8Array, length?: number): UserData {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseUser();
+    const message = createBaseUserData();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -181,7 +181,7 @@ export const User: MessageFns<User> = {
     return message;
   },
 
-  fromJSON(object: any): User {
+  fromJSON(object: any): UserData {
     return {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
       name: isSet(object.name) ? globalThis.String(object.name) : "",
@@ -190,7 +190,7 @@ export const User: MessageFns<User> = {
     };
   },
 
-  toJSON(message: User): unknown {
+  toJSON(message: UserData): unknown {
     const obj: any = {};
     if (message.id !== "") {
       obj.id = message.id;
@@ -207,11 +207,11 @@ export const User: MessageFns<User> = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<User>, I>>(base?: I): User {
-    return User.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<UserData>, I>>(base?: I): UserData {
+    return UserData.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<User>, I>>(object: I): User {
-    const message = createBaseUser();
+  fromPartial<I extends Exact<DeepPartial<UserData>, I>>(object: I): UserData {
+    const message = createBaseUserData();
     message.id = object.id ?? "";
     message.name = object.name ?? "";
     message.email = object.email ?? "";
@@ -450,7 +450,7 @@ function createBaseUsersWithMeta(): UsersWithMeta {
 export const UsersWithMeta: MessageFns<UsersWithMeta> = {
   encode(message: UsersWithMeta, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     for (const v of message.users) {
-      User.encode(v!, writer.uint32(10).fork()).join();
+      UserData.encode(v!, writer.uint32(10).fork()).join();
     }
     if (message.meta !== undefined) {
       Meta.encode(message.meta, writer.uint32(18).fork()).join();
@@ -470,7 +470,7 @@ export const UsersWithMeta: MessageFns<UsersWithMeta> = {
             break;
           }
 
-          message.users.push(User.decode(reader, reader.uint32()));
+          message.users.push(UserData.decode(reader, reader.uint32()));
           continue;
         case 2:
           if (tag !== 18) {
@@ -490,7 +490,7 @@ export const UsersWithMeta: MessageFns<UsersWithMeta> = {
 
   fromJSON(object: any): UsersWithMeta {
     return {
-      users: globalThis.Array.isArray(object?.users) ? object.users.map((e: any) => User.fromJSON(e)) : [],
+      users: globalThis.Array.isArray(object?.users) ? object.users.map((e: any) => UserData.fromJSON(e)) : [],
       meta: isSet(object.meta) ? Meta.fromJSON(object.meta) : undefined,
     };
   },
@@ -498,7 +498,7 @@ export const UsersWithMeta: MessageFns<UsersWithMeta> = {
   toJSON(message: UsersWithMeta): unknown {
     const obj: any = {};
     if (message.users?.length) {
-      obj.users = message.users.map((e) => User.toJSON(e));
+      obj.users = message.users.map((e) => UserData.toJSON(e));
     }
     if (message.meta !== undefined) {
       obj.meta = Meta.toJSON(message.meta);
@@ -511,7 +511,7 @@ export const UsersWithMeta: MessageFns<UsersWithMeta> = {
   },
   fromPartial<I extends Exact<DeepPartial<UsersWithMeta>, I>>(object: I): UsersWithMeta {
     const message = createBaseUsersWithMeta();
-    message.users = object.users?.map((e) => User.fromPartial(e)) || [];
+    message.users = object.users?.map((e) => UserData.fromPartial(e)) || [];
     message.meta = (object.meta !== undefined && object.meta !== null) ? Meta.fromPartial(object.meta) : undefined;
     return message;
   },
@@ -655,7 +655,7 @@ function createBaseGetUserResponse(): GetUserResponse {
 export const GetUserResponse: MessageFns<GetUserResponse> = {
   encode(message: GetUserResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.user !== undefined) {
-      User.encode(message.user, writer.uint32(10).fork()).join();
+      UserData.encode(message.user, writer.uint32(10).fork()).join();
     }
     if (message.error !== undefined) {
       UserError.encode(message.error, writer.uint32(18).fork()).join();
@@ -675,7 +675,7 @@ export const GetUserResponse: MessageFns<GetUserResponse> = {
             break;
           }
 
-          message.user = User.decode(reader, reader.uint32());
+          message.user = UserData.decode(reader, reader.uint32());
           continue;
         case 2:
           if (tag !== 18) {
@@ -695,7 +695,7 @@ export const GetUserResponse: MessageFns<GetUserResponse> = {
 
   fromJSON(object: any): GetUserResponse {
     return {
-      user: isSet(object.user) ? User.fromJSON(object.user) : undefined,
+      user: isSet(object.user) ? UserData.fromJSON(object.user) : undefined,
       error: isSet(object.error) ? UserError.fromJSON(object.error) : undefined,
     };
   },
@@ -703,7 +703,7 @@ export const GetUserResponse: MessageFns<GetUserResponse> = {
   toJSON(message: GetUserResponse): unknown {
     const obj: any = {};
     if (message.user !== undefined) {
-      obj.user = User.toJSON(message.user);
+      obj.user = UserData.toJSON(message.user);
     }
     if (message.error !== undefined) {
       obj.error = UserError.toJSON(message.error);
@@ -716,7 +716,7 @@ export const GetUserResponse: MessageFns<GetUserResponse> = {
   },
   fromPartial<I extends Exact<DeepPartial<GetUserResponse>, I>>(object: I): GetUserResponse {
     const message = createBaseGetUserResponse();
-    message.user = (object.user !== undefined && object.user !== null) ? User.fromPartial(object.user) : undefined;
+    message.user = (object.user !== undefined && object.user !== null) ? UserData.fromPartial(object.user) : undefined;
     message.error = (object.error !== undefined && object.error !== null)
       ? UserError.fromPartial(object.error)
       : undefined;
@@ -1107,7 +1107,7 @@ function createBaseCreateUserResponse(): CreateUserResponse {
 export const CreateUserResponse: MessageFns<CreateUserResponse> = {
   encode(message: CreateUserResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.user !== undefined) {
-      User.encode(message.user, writer.uint32(10).fork()).join();
+      UserData.encode(message.user, writer.uint32(10).fork()).join();
     }
     if (message.error !== undefined) {
       UserError.encode(message.error, writer.uint32(18).fork()).join();
@@ -1127,7 +1127,7 @@ export const CreateUserResponse: MessageFns<CreateUserResponse> = {
             break;
           }
 
-          message.user = User.decode(reader, reader.uint32());
+          message.user = UserData.decode(reader, reader.uint32());
           continue;
         case 2:
           if (tag !== 18) {
@@ -1147,7 +1147,7 @@ export const CreateUserResponse: MessageFns<CreateUserResponse> = {
 
   fromJSON(object: any): CreateUserResponse {
     return {
-      user: isSet(object.user) ? User.fromJSON(object.user) : undefined,
+      user: isSet(object.user) ? UserData.fromJSON(object.user) : undefined,
       error: isSet(object.error) ? UserError.fromJSON(object.error) : undefined,
     };
   },
@@ -1155,7 +1155,7 @@ export const CreateUserResponse: MessageFns<CreateUserResponse> = {
   toJSON(message: CreateUserResponse): unknown {
     const obj: any = {};
     if (message.user !== undefined) {
-      obj.user = User.toJSON(message.user);
+      obj.user = UserData.toJSON(message.user);
     }
     if (message.error !== undefined) {
       obj.error = UserError.toJSON(message.error);
@@ -1168,7 +1168,7 @@ export const CreateUserResponse: MessageFns<CreateUserResponse> = {
   },
   fromPartial<I extends Exact<DeepPartial<CreateUserResponse>, I>>(object: I): CreateUserResponse {
     const message = createBaseCreateUserResponse();
-    message.user = (object.user !== undefined && object.user !== null) ? User.fromPartial(object.user) : undefined;
+    message.user = (object.user !== undefined && object.user !== null) ? UserData.fromPartial(object.user) : undefined;
     message.error = (object.error !== undefined && object.error !== null)
       ? UserError.fromPartial(object.error)
       : undefined;
@@ -1302,7 +1302,7 @@ function createBaseUpdateUserResponse(): UpdateUserResponse {
 export const UpdateUserResponse: MessageFns<UpdateUserResponse> = {
   encode(message: UpdateUserResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.user !== undefined) {
-      User.encode(message.user, writer.uint32(10).fork()).join();
+      UserData.encode(message.user, writer.uint32(10).fork()).join();
     }
     if (message.error !== undefined) {
       UserError.encode(message.error, writer.uint32(18).fork()).join();
@@ -1322,7 +1322,7 @@ export const UpdateUserResponse: MessageFns<UpdateUserResponse> = {
             break;
           }
 
-          message.user = User.decode(reader, reader.uint32());
+          message.user = UserData.decode(reader, reader.uint32());
           continue;
         case 2:
           if (tag !== 18) {
@@ -1342,7 +1342,7 @@ export const UpdateUserResponse: MessageFns<UpdateUserResponse> = {
 
   fromJSON(object: any): UpdateUserResponse {
     return {
-      user: isSet(object.user) ? User.fromJSON(object.user) : undefined,
+      user: isSet(object.user) ? UserData.fromJSON(object.user) : undefined,
       error: isSet(object.error) ? UserError.fromJSON(object.error) : undefined,
     };
   },
@@ -1350,7 +1350,7 @@ export const UpdateUserResponse: MessageFns<UpdateUserResponse> = {
   toJSON(message: UpdateUserResponse): unknown {
     const obj: any = {};
     if (message.user !== undefined) {
-      obj.user = User.toJSON(message.user);
+      obj.user = UserData.toJSON(message.user);
     }
     if (message.error !== undefined) {
       obj.error = UserError.toJSON(message.error);
@@ -1363,7 +1363,7 @@ export const UpdateUserResponse: MessageFns<UpdateUserResponse> = {
   },
   fromPartial<I extends Exact<DeepPartial<UpdateUserResponse>, I>>(object: I): UpdateUserResponse {
     const message = createBaseUpdateUserResponse();
-    message.user = (object.user !== undefined && object.user !== null) ? User.fromPartial(object.user) : undefined;
+    message.user = (object.user !== undefined && object.user !== null) ? UserData.fromPartial(object.user) : undefined;
     message.error = (object.error !== undefined && object.error !== null)
       ? UserError.fromPartial(object.error)
       : undefined;
