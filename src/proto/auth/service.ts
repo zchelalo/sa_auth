@@ -43,6 +43,7 @@ export interface Tokens {
 
 export interface IsAuth {
   isAuthorized: boolean;
+  userId?: string | undefined;
   tokens?: Tokens | undefined;
 }
 
@@ -391,7 +392,7 @@ export const Tokens: MessageFns<Tokens> = {
 };
 
 function createBaseIsAuth(): IsAuth {
-  return { isAuthorized: false, tokens: undefined };
+  return { isAuthorized: false, userId: undefined, tokens: undefined };
 }
 
 export const IsAuth: MessageFns<IsAuth> = {
@@ -399,8 +400,11 @@ export const IsAuth: MessageFns<IsAuth> = {
     if (message.isAuthorized !== false) {
       writer.uint32(8).bool(message.isAuthorized);
     }
+    if (message.userId !== undefined) {
+      writer.uint32(18).string(message.userId);
+    }
     if (message.tokens !== undefined) {
-      Tokens.encode(message.tokens, writer.uint32(18).fork()).join();
+      Tokens.encode(message.tokens, writer.uint32(26).fork()).join();
     }
     return writer;
   },
@@ -424,6 +428,13 @@ export const IsAuth: MessageFns<IsAuth> = {
             break;
           }
 
+          message.userId = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
           message.tokens = Tokens.decode(reader, reader.uint32());
           continue;
       }
@@ -438,6 +449,7 @@ export const IsAuth: MessageFns<IsAuth> = {
   fromJSON(object: any): IsAuth {
     return {
       isAuthorized: isSet(object.isAuthorized) ? globalThis.Boolean(object.isAuthorized) : false,
+      userId: isSet(object.userId) ? globalThis.String(object.userId) : undefined,
       tokens: isSet(object.tokens) ? Tokens.fromJSON(object.tokens) : undefined,
     };
   },
@@ -446,6 +458,9 @@ export const IsAuth: MessageFns<IsAuth> = {
     const obj: any = {};
     if (message.isAuthorized !== false) {
       obj.isAuthorized = message.isAuthorized;
+    }
+    if (message.userId !== undefined) {
+      obj.userId = message.userId;
     }
     if (message.tokens !== undefined) {
       obj.tokens = Tokens.toJSON(message.tokens);
@@ -459,6 +474,7 @@ export const IsAuth: MessageFns<IsAuth> = {
   fromPartial<I extends Exact<DeepPartial<IsAuth>, I>>(object: I): IsAuth {
     const message = createBaseIsAuth();
     message.isAuthorized = object.isAuthorized ?? false;
+    message.userId = object.userId ?? undefined;
     message.tokens = (object.tokens !== undefined && object.tokens !== null)
       ? Tokens.fromPartial(object.tokens)
       : undefined;

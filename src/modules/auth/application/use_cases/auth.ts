@@ -170,7 +170,7 @@ export class AuthUseCase {
     await this.authRepository.revokeTokenByTokenValue(refreshToken)
   }
 
-  public async isAuthorized(accessToken: string, refreshToken: string): Promise<{ isAuthorized: boolean, tokens?: { accessToken: string, refreshToken: string, expiresAt?: number } }> {
+  public async isAuthorized(accessToken: string, refreshToken: string): Promise<{ isAuthorized: boolean, userId?: string, tokens?: { accessToken: string, refreshToken: string, expiresAt?: number } }> {
     try {
       tokenSchema.parse({ token: accessToken })
       tokenSchema.parse({ token: refreshToken })
@@ -184,6 +184,7 @@ export class AuthUseCase {
 
       return {
         isAuthorized: true,
+        userId: accessPayload.sub as string,
         tokens: {
           accessToken,
           refreshToken
@@ -196,6 +197,7 @@ export class AuthUseCase {
 
           return {
             isAuthorized: true,
+            userId: newTokens.userId,
             tokens: {
               accessToken: newTokens.accessToken,
               refreshToken: newTokens.refreshToken ? newTokens.refreshToken : refreshToken,
