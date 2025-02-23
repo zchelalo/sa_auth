@@ -1,4 +1,4 @@
-import { UserServiceClient } from 'src/proto/user/service'
+import { UserServiceClient } from 'src/proto/user'
 import {
   GetUsersRequest,
   GetUsersResponse,
@@ -12,7 +12,7 @@ import {
 
   UpdateUserRequest,
   UpdateUserResponse
-} from 'src/proto/user/service'
+} from 'src/proto/user'
 import { UserRepository } from 'src/modules/user/domain/repository'
 import { UserEntity } from 'src/modules/user/domain/entity'
 import { logger } from 'src/helpers/logger'

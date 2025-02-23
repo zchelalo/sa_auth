@@ -1,5 +1,5 @@
 import * as grpc from '@grpc/grpc-js'
-import { Error as ProtoError } from 'src/proto/auth/service'
+import { Error as ProtoError } from 'src/proto/shared'
 import { BadRequestError, ConflictError, CustomError, ForbiddenError, InternalServerError, NotFoundError, UnauthorizedError } from './custom_error'
 import { ZodError } from 'zod'
 

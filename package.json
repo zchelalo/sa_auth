@@ -5,11 +5,9 @@
   "main": "./src/main.ts",
   "type": "module",
   "scripts": {
-    "proto:generate:auth": "protoc --experimental_allow_proto3_optional --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/proto --ts_proto_opt=outputServices=grpc-js,env=node --proto_path=sa_proto sa_proto/auth/service.proto",
-    "proto:generate:user": "protoc --experimental_allow_proto3_optional --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/proto --ts_proto_opt=outputServices=grpc-js,env=node --proto_path=sa_proto sa_proto/user/service.proto",
+    "proto:generate": "protoc --experimental_allow_proto3_optional --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/proto --ts_proto_opt=outputServices=grpc-js,env=node --proto_path=sa_proto/services sa_proto/services/auth.proto sa_proto/services/user.proto sa_proto/services/shared.proto",
     "create:envs": "bash ./scripts/create_envs.sh",
     "create:certs": "bash ./scripts/create_certs.sh",
-    "create:proto": "npm run proto:generate:auth && npm run proto:generate:user",
     "create:docs": "typedoc --entryPointStrategy expand ./src --name 'App' --out docs",
     "compose": "docker compose -f ./.dockers/docker-compose.yml up",
     "compose:build": "sudo docker compose -f ./.dockers/docker-compose.yml up --build",

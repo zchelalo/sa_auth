@@ -11,7 +11,7 @@ import {
   SignUpResponse,
   IsAuthorizedRequest,
   IsAuthorizedResponse
-} from 'src/proto/auth/service'
+} from 'src/proto/auth'
 import { handlerErrors } from 'src/helpers/errors/handler'
 import { signInSchema, signUpSchema, tokenSchema } from 'src/modules/auth/application/schemas/auth'
 
