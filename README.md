@@ -1,7 +1,7 @@
 # Saloncito Authentication Submodule
 This submodule manages project authentication.
 
-### Tabla de contenido
+### Table of contents
 - [How to run the project?](#how-to-run-the-project)
   - [Prerequisites](#prerequisites)
   - [Project cloning](#project-cloning)
@@ -9,6 +9,7 @@ This submodule manages project authentication.
   - [Asymmetric key creation](#asymmetric-key-creation)
   - [Docker execution](#docker-execution)
   - [Migrations](#migrations)
+  - [Proto files](#proto-files)
 - [Testing](#testing)
 - [Documentation](#documentation)
   - [Typedoc](#typedoc)
@@ -18,11 +19,12 @@ This submodule manages project authentication.
 - [Docker](https://docs.docker.com/install/)
 - [Docker compose](https://docs.docker.com/compose/install/)
 - [NodeJS](https://nodejs.org/en/download/package-manager)
+- [Protoc](https://grpc.io/docs/protoc-installation/)
 
 *Note: Keep in mind that the entire project was tested on WSL.*
 
 ### Project cloning
-If you haven't already cloned the project, you can do so by running `git clone <url>`
+If you haven't cloned the project yet, you can do so by running `git clone <url>`. Once the project is cloned, if you plan to write code or generate code using protoc, make sure to run `npm install` to install the necessary packages locally. This will set up autocomplete and ensure you have all the required dependencies for code generation.
 
 ### Environment variables
 To configure the environment variables within the project, there is a script in the package.json file called `npm run create:envs`. When executed, it will copy the ".env.example" file to a ".env" file. If you need to change something, just modify the newly created ".env" file.
@@ -43,6 +45,9 @@ Once the migrations are generated, you need to push them with `npm run migration
 Sometimes it can be tedious to run these two commands separately, so there's a command that creates the migrations and then pushes them in one go: `npm run migrate`.
 
 Once the migrations have been executed, the only step left is to run the seed. This will insert some necessary records for the application to function, such as the authentication token keys.
+
+### Proto files
+If you modified any proto file in the "sa_proto" submodule and need to generate the TS files, you can run `npm run proto:generate`, and the TS files will be generated.
 
 ## Testing
 Once the entire project is running, it’s time to execute the tests. These are located in the "test" folder, and within it, the path of the tested file is replicated, with the only difference being that it includes ".test" after the name. The script to run the tests can be found in the package.json file, which in this case is `npm run test`. First, it sets the "NODE_ENV" environment variable to "test", so when loading the environment variables in the project, the ".env.test" file is loaded. If you want to handle a different value in the environment variables during the tests, you can do so.
