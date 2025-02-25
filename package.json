@@ -5,6 +5,7 @@
   "main": "./src/main.ts",
   "type": "module",
   "scripts": {
+    "setup": "npm run create:envs && npm run create:certs && npm run compose:build:detached && chmod +x ./scripts/wait_for_db.sh && ./scripts/wait_for_db.sh localhost 5434 && npm run migrate && npm run migration:seed",
     "proto:generate": "protoc --experimental_allow_proto3_optional --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/proto --ts_proto_opt=outputServices=grpc-js,env=node --proto_path=sa_proto/services sa_proto/services/auth.proto sa_proto/services/user.proto sa_proto/services/shared.proto",
     "create:envs": "bash ./scripts/create_envs.sh",
     "create:certs": "bash ./scripts/create_certs.sh",
