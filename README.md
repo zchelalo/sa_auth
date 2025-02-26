@@ -25,6 +25,7 @@ This submodule manages project authentication.
 
 ### Project cloning
 If you haven't cloned the project yet, you can do so by running `git clone <url>`. Once the project is cloned, if you plan to write code or generate code using protoc, make sure to run `npm install` to install the necessary packages locally. This will set up autocomplete and ensure you have all the required dependencies for code generation.
+Each of the following steps can be executed by running `npm run setup` (this command should be executed only the first time).
 
 ### Environment variables
 To configure the environment variables within the project, there is a script in the package.json file called `npm run create:envs`. When executed, it will copy the ".env.example" file to a ".env" file. If you need to change something, just modify the newly created ".env" file.
