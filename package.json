@@ -5,7 +5,7 @@
   "main": "./src/main.ts",
   "type": "module",
   "scripts": {
-    "setup": "npm run create:envs && npm run create:certs && npm run compose:build:detached && chmod +x ./scripts/wait_for_db.sh && ./scripts/wait_for_db.sh localhost 5434 && npm run migrate && npm run migration:seed",
+    "setup": "npm i && npm run create:envs && npm run create:certs && npm run compose:build:detached && dotenv -e .env -- sh -c 'docker run --rm --network=dockers_sa_auth_network -v $(pwd)/scripts:/scripts alpine sh /scripts/wait_for_db.sh $DB_HOST $DB_PORT' && npm run migrate && npm run migration:seed",
     "proto:generate": "protoc --experimental_allow_proto3_optional --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/proto --ts_proto_opt=outputServices=grpc-js,env=node --proto_path=sa_proto/services sa_proto/services/auth.proto sa_proto/services/user.proto sa_proto/services/shared.proto",
     "create:envs": "bash ./scripts/create_envs.sh",
     "create:certs": "bash ./scripts/create_certs.sh",
@@ -46,6 +46,7 @@
     "@types/node-jose": "^1.1.13",
     "@types/pg": "^8.11.6",
     "@types/uuid": "^10.0.0",
+    "dotenv-cli": "^8.0.0",
     "drizzle-kit": "^0.24.0",
     "jest": "^29.7.0",
     "jest-html-reporter": "^3.10.2",
